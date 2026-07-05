@@ -10,8 +10,10 @@ class Validator:
     
     @staticmethod
     def validate_phone(phone):
-        """Validate phone number"""
-        pattern = r'^\+?1?\d{9,15}$'
+        """Validate phone number - supports various formats"""
+        # Remove spaces, dashes, parentheses
+        phone = re.sub(r'[\s\-\(\)]', '', phone)
+        pattern = r'^\+?[0-9]{10,15}$'
         return bool(re.match(pattern, phone))
     
     @staticmethod

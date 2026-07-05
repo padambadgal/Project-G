@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-tachometer-alt"></i> Patient Dashboard</h1>
+            <p class="welcome-text">Welcome back, {{ user.full_name }}!</p>
+        </div>
+    </div>
+    
+    {% if patient %}
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+            <h2><i class="fas fa-user"></i> Your Profile</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div><strong>Username:</strong> {{ patient.username }}</div>
+            <div><strong>Full Name:</strong> {{ patient.full_name }}</div>
+            <div><strong>Age:</strong> {{ patient.age or 'N/A' }}</div>
+            <div><strong>Gender:</strong> {{ patient.gender or 'N/A' }}</div>
+            <div><strong>Phone:</strong> {{ patient.phone or 'N/A' }}</div>
+            <div><strong>Email:</strong> {{ patient.email or 'N/A' }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <a href="{{ url_for('patient_profile') }}" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-header">
+                <h2><i class="fas fa-edit"></i> Update Profile</h2>
+            </div>
+            <p style="color: var(--dark-gray);">View and update your personal information</p>
+            <div style="margin-top: 1rem;">
+                <span class="btn btn-primary">Update Profile →</span>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('patient_predictions') }}" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> My Predictions</h2>
+            </div>
+            <p style="color: var(--dark-gray);">View all your disease prediction history</p>
+            <div style="margin-top: 1rem;">
+                <span class="btn btn-secondary">View History →</span>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

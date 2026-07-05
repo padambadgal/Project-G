@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-tachometer-alt"></i> Doctor Dashboard</h1>
+            <p class="welcome-text">Welcome back, Dr. {{ user.full_name }}!</p>
+        </div>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-number">{{ stats.total_predictions }}</div>
+            <div class="stat-label">Total Predictions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-number">{{ "%.1f"|format(stats.avg_confidence|float * 100) }}%</div>
+            <div class="stat-label">Average Confidence</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-number">{{ stats.unique_patients }}</div>
+            <div class="stat-label">Unique Patients</div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <a href="{{ url_for('doctor_predict') }}" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-header">
+                <h2><i class="fas fa-stethoscope"></i> Predict Disease</h2>
+            </div>
+            <p style="color: var(--dark-gray);">Enter patient symptoms to get AI-powered disease prediction</p>
+            <div style="margin-top: 1rem;">
+                <span class="btn btn-primary">Start Prediction →</span>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('doctor_predictions') }}" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> View History</h2>
+            </div>
+            <p style="color: var(--dark-gray);">View all your previous disease predictions</p>
+            <div style="margin-top: 1rem;">
+                <span class="btn btn-secondary">View History →</span>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

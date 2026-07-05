@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-user-cog"></i> Manage Users</h1>
+            <p class="welcome-text">View and manage all system users</p>
+        </div>
+        <div class="header-actions">
+            <span class="badge badge-red">
+                <i class="fas fa-users"></i> {{ users|length if users else 0 }} Users
+            </span>
+        </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-list"></i> User List</h2>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if users %}
+                        {% for user in users %}
+                        <tr>
+                            <td>#{{ user.id }}</td>
+                            <td><strong>{{ user.username }}</strong></td>
+                            <td>{{ user.full_name }}</td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="badge badge-red">Admin</span>
+                                {% elif user.role == 'doctor' %}
+                                    <span class="badge badge-blue">Doctor</span>
+                                {% else %}
+                                    <span class="badge badge-green">Patient</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.email or 'N/A' }}</td>
+                            <td>{{ user.phone or 'N/A' }}</td>
+                            <td>
+                                <div class="actions">
+                                    {% if user.username != 'admin' %}
+                                        <a href="{{ url_for('admin_delete_user', username=user.username) }}" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Delete this user?')"
+                                           title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    {% else %}
+                                        <span style="color: var(--medium-gray); font-size: 0.8rem;">
+                                            <i class="fas fa-lock"></i> Protected
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--medium-gray);">
+                                <i class="fas fa-users" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                                No users found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

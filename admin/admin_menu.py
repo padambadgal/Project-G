@@ -87,6 +87,7 @@ class AdminMenu:
                 input("\nInvalid choice. Press Enter to continue...")
     
     def add_patient(self):
+        """Add a new patient"""
         self.clear_screen()
         print("\n--- Add New Patient ---\n")
         
@@ -109,6 +110,7 @@ class AdminMenu:
         input("\nPress Enter to continue...")
     
     def view_all_patients(self):
+        """View all patients"""
         self.clear_screen()
         print("\n--- All Patients ---\n")
         
@@ -117,13 +119,17 @@ class AdminMenu:
             print(f"{'ID':<15} {'Name':<30} {'Age':<5} {'Gender':<10} {'Contact':<15}")
             print("-" * 80)
             for patient in patients:
-                print(f"{patient[1]:<15} {patient[2]:<30} {patient[3]:<5} {patient[4]:<10} {patient[5]:<15}")
+                # ✅ FIX: Properly handle age and contact
+                age = patient['age'] if patient['age'] else 'N/A'
+                contact = patient['contact'] if patient['contact'] else 'N/A'
+                print(f"{patient['patient_id']:<15} {patient['full_name']:<30} {age:<5} {patient['gender']:<10} {contact:<15}")
         else:
             print("No patients found.")
         
         input("\nPress Enter to continue...")
     
     def search_patient(self):
+        """Search for a patient"""
         self.clear_screen()
         print("\n--- Search Patient ---\n")
         
@@ -134,13 +140,15 @@ class AdminMenu:
             print(f"\n{'ID':<15} {'Name':<30} {'Age':<5} {'Gender':<10} {'Contact':<15}")
             print("-" * 80)
             for patient in results:
-                print(f"{patient[1]:<15} {patient[2]:<30} {patient[3]:<5} {patient[4]:<10} {patient[5]:<15}")
+                contact = patient['contact'] if patient['contact'] else 'N/A'
+                print(f"{patient['patient_id']:<15} {patient['full_name']:<30} {patient['age']:<5} {patient['gender']:<10} {contact:<15}")
         else:
             print("\nNo patients found matching the search term.")
         
         input("\nPress Enter to continue...")
     
     def update_patient(self):
+        """Update patient information"""
         self.clear_screen()
         print("\n--- Update Patient ---\n")
         
@@ -153,20 +161,20 @@ class AdminMenu:
             return
         
         print(f"\nCurrent Details:")
-        print(f"Name: {patient[2]}")
-        print(f"Age: {patient[3]}")
-        print(f"Gender: {patient[4]}")
-        print(f"Contact: {patient[5]}")
-        print(f"Address: {patient[6]}")
-        print(f"Medical History: {patient[7]}")
+        print(f"Name: {patient['full_name']}")
+        print(f"Age: {patient['age']}")
+        print(f"Gender: {patient['gender']}")
+        print(f"Contact: {patient['contact']}")
+        print(f"Address: {patient['address']}")
+        print(f"Medical History: {patient['medical_history']}")
         
         print("\nEnter new values (leave blank to keep current):")
-        full_name = input(f"Full Name [{patient[2]}]: ").strip()
-        age = input(f"Age [{patient[3]}]: ").strip()
-        gender = input(f"Gender [{patient[4]}]: ").strip()
-        contact = input(f"Contact [{patient[5]}]: ").strip()
-        address = input(f"Address [{patient[6]}]: ").strip()
-        medical_history = input(f"Medical History [{patient[7]}]: ").strip()
+        full_name = input(f"Full Name [{patient['full_name']}]: ").strip()
+        age = input(f"Age [{patient['age']}]: ").strip()
+        gender = input(f"Gender [{patient['gender']}]: ").strip()
+        contact = input(f"Contact [{patient['contact']}]: ").strip()
+        address = input(f"Address [{patient['address']}]: ").strip()
+        medical_history = input(f"Medical History [{patient['medical_history']}]: ").strip()
         
         success, message = self.patient.update_patient(
             patient_id,
@@ -186,6 +194,7 @@ class AdminMenu:
         input("\nPress Enter to continue...")
     
     def delete_patient(self):
+        """Delete a patient"""
         self.clear_screen()
         print("\n--- Delete Patient ---\n")
         
@@ -236,6 +245,7 @@ class AdminMenu:
                 input("\nInvalid choice. Press Enter to continue...")
     
     def add_doctor(self):
+        """Add a new doctor"""
         self.clear_screen()
         print("\n--- Add New Doctor ---\n")
         
@@ -257,6 +267,7 @@ class AdminMenu:
         input("\nPress Enter to continue...")
     
     def view_all_doctors(self):
+        """View all doctors"""
         self.clear_screen()
         print("\n--- All Doctors ---\n")
         
@@ -265,13 +276,15 @@ class AdminMenu:
             print(f"{'ID':<15} {'Name':<30} {'Specialization':<25} {'Experience':<10} {'Contact':<15}")
             print("-" * 100)
             for doctor in doctors:
-                print(f"{doctor[1]:<15} {doctor[2]:<30} {doctor[3]:<25} {doctor[6]:<10} {doctor[4]:<15}")
+                contact = doctor['contact'] if doctor['contact'] else 'N/A'
+                print(f"{doctor['doctor_id']:<15} {doctor['full_name']:<30} {doctor['specialization']:<25} {doctor['years_experience']:<10} {contact:<15}")
         else:
             print("No doctors found.")
         
         input("\nPress Enter to continue...")
     
     def search_doctor(self):
+        """Search for a doctor"""
         self.clear_screen()
         print("\n--- Search Doctor ---\n")
         
@@ -282,13 +295,14 @@ class AdminMenu:
             print(f"\n{'ID':<15} {'Name':<30} {'Specialization':<25} {'Experience':<10}")
             print("-" * 85)
             for doctor in results:
-                print(f"{doctor[1]:<15} {doctor[2]:<30} {doctor[3]:<25} {doctor[6]:<10}")
+                print(f"{doctor['doctor_id']:<15} {doctor['full_name']:<30} {doctor['specialization']:<25} {doctor['years_experience']:<10}")
         else:
             print("\nNo doctors found matching the search term.")
         
         input("\nPress Enter to continue...")
     
     def update_doctor(self):
+        """Update doctor information"""
         self.clear_screen()
         print("\n--- Update Doctor ---\n")
         
@@ -301,18 +315,18 @@ class AdminMenu:
             return
         
         print(f"\nCurrent Details:")
-        print(f"Name: {doctor[2]}")
-        print(f"Specialization: {doctor[3]}")
-        print(f"Contact: {doctor[4]}")
-        print(f"Email: {doctor[5]}")
-        print(f"Years of Experience: {doctor[6]}")
+        print(f"Name: {doctor['full_name']}")
+        print(f"Specialization: {doctor['specialization']}")
+        print(f"Contact: {doctor['contact']}")
+        print(f"Email: {doctor['email']}")
+        print(f"Years of Experience: {doctor['years_experience']}")
         
         print("\nEnter new values (leave blank to keep current):")
-        full_name = input(f"Full Name [{doctor[2]}]: ").strip()
-        specialization = input(f"Specialization [{doctor[3]}]: ").strip()
-        contact = input(f"Contact [{doctor[4]}]: ").strip()
-        email = input(f"Email [{doctor[5]}]: ").strip()
-        years_experience = input(f"Years of Experience [{doctor[6]}]: ").strip()
+        full_name = input(f"Full Name [{doctor['full_name']}]: ").strip()
+        specialization = input(f"Specialization [{doctor['specialization']}]: ").strip()
+        contact = input(f"Contact [{doctor['contact']}]: ").strip()
+        email = input(f"Email [{doctor['email']}]: ").strip()
+        years_experience = input(f"Years of Experience [{doctor['years_experience']}]: ").strip()
         
         success, message = self.doctor.update_doctor(
             doctor_id,
@@ -331,6 +345,7 @@ class AdminMenu:
         input("\nPress Enter to continue...")
     
     def delete_doctor(self):
+        """Delete a doctor"""
         self.clear_screen()
         print("\n--- Delete Doctor ---\n")
         
@@ -358,10 +373,11 @@ class AdminMenu:
             print("\n1. View All Users")
             print("2. Add New User")
             print("3. Delete User")
-            print("4. Back to Main Menu")
+            print("4. Convert User to Doctor")  # ✅ NEW
+            print("5. Back to Main Menu")
             print("-" * 50)
             
-            choice = input("\nEnter your choice (1-4): ").strip()
+            choice = input("\nEnter your choice (1-5): ").strip()
             
             if choice == '1':
                 self.view_all_users()
@@ -370,11 +386,49 @@ class AdminMenu:
             elif choice == '3':
                 self.delete_user()
             elif choice == '4':
+                self.convert_to_doctor()  # ✅ NEW
+            elif choice == '5':
                 break
             else:
                 input("\nInvalid choice. Press Enter to continue...")
+
+    def convert_to_doctor(self):
+        """Convert a user to doctor"""
+        self.clear_screen()
+        print("\n--- Convert User to Doctor ---\n")
+        
+        # Show users that can be converted
+        users = self.admin.get_all_users()
+        
+        print("Available Users:")
+        print(f"{'Username':<15} {'Full Name':<25} {'Role':<10}")
+        print("-" * 55)
+        
+        for user in users:
+            if user['role'] != 'doctor':
+                print(f"{user['username']:<15} {user['full_name']:<25} {user['role']:<10}")
+        
+        print("-" * 55)
+        username = input("\nEnter username to convert to doctor: ").strip()
+        
+        if not username:
+            print("No username entered.")
+            input("\nPress Enter to continue...")
+            return
+        
+        confirm = input(f"Convert {username} to doctor? (y/n): ").strip().lower()
+        
+        if confirm == 'y':
+            success, message = self.convert_user_to_doctor(username)
+            if success:
+                print(f"\n✓ {message}")
+            else:
+                print(f"\n✗ {message}")
+        
+        input("\nPress Enter to continue...")
     
     def view_all_users(self):
+        """View all users"""
         self.clear_screen()
         print("\n--- All Users ---\n")
         
@@ -383,13 +437,15 @@ class AdminMenu:
             print(f"{'Username':<15} {'Full Name':<30} {'Role':<15} {'Email':<25}")
             print("-" * 90)
             for user in users:
-                print(f"{user[1]:<15} {user[4]:<30} {user[3]:<15} {user[5] if user[5] else 'N/A':<25}")
+                email = user['email'] if user['email'] else 'N/A'
+                print(f"{user['username']:<15} {user['full_name']:<30} {user['role']:<15} {email:<25}")
         else:
             print("No users found.")
         
         input("\nPress Enter to continue...")
     
     def add_new_user(self):
+        """Add a new user"""
         self.clear_screen()
         print("\n--- Add New User ---\n")
         
@@ -415,6 +471,7 @@ class AdminMenu:
         input("\nPress Enter to continue...")
     
     def delete_user(self):
+        """Delete a user"""
         self.clear_screen()
         print("\n--- Delete User ---\n")
         
@@ -446,8 +503,8 @@ class AdminMenu:
         stats = self.admin.get_system_statistics()
         
         print("User Statistics:")
-        for role, count in stats['user_stats']:
-            print(f"  {role.capitalize()}s: {count}")
+        for stat in stats['user_stats']:
+            print(f"  {stat['role'].capitalize()}s: {stat['count']}")
         
         print(f"\nTotal Patients: {stats['total_patients']}")
         print(f"Total Doctors: {stats['total_doctors']}")
@@ -487,11 +544,69 @@ class AdminMenu:
             print(f"{'Patient':<20} {'Doctor':<20} {'Disease':<20} {'Confidence':<12} {'Risk':<10} {'Date':<20}")
             print("-" * 110)
             for pred in predictions:
-                patient_name = pred[7] if pred[7] else 'N/A'
-                doctor_name = pred[8] if pred[8] else 'N/A'
-                print(f"{patient_name[:20]:<20} {doctor_name[:20]:<20} {pred[5]:<20} {pred[6]:.2%}   {pred[7]:<10} {pred[9][:19]:<20}")
+                patient_name = pred['patient_name'] if pred['patient_name'] else 'N/A'
+                doctor_name = pred['doctor_name'] if pred['doctor_name'] else 'N/A'
+                confidence = pred['confidence'] if pred['confidence'] else 0
+                risk_level = pred['risk_level'] if pred['risk_level'] else 'N/A'
+                predicted_at = pred['predicted_at'] if pred['predicted_at'] else 'N/A'
+                if predicted_at and predicted_at != 'N/A':
+                    predicted_at = str(predicted_at)[:19]
+                disease = pred['predicted_disease'] if pred['predicted_disease'] else 'N/A'
+                print(f"{patient_name[:20]:<20} {doctor_name[:20]:<20} {disease[:20]:<20} {confidence:.2%}   {risk_level:<10} {predicted_at:<20}")
         else:
             print("No predictions found.")
         
         reports.close()
         input("\nPress Enter to continue...")
+
+    def convert_user_to_doctor(self, username):
+        """Convert a user to doctor"""
+        try:
+            # Get user
+            user = self.admin.db.fetch_one(
+                "SELECT * FROM users WHERE username = ?",
+                (username,)
+            )
+            
+            if not user:
+                return False, "User not found"
+            
+            # Check if doctor already exists
+            existing = self.admin.db.fetch_one(
+                "SELECT * FROM doctors WHERE full_name = ?",
+                (user['full_name'],)
+            )
+            
+            if existing:
+                return False, "Doctor already exists with this name"
+            
+            from utils.helper import generate_id
+            doctor_id = generate_id("D")
+            
+            # Insert into doctors
+            query = """
+            INSERT INTO doctors
+            (doctor_id, full_name, email, contact, gender, age, specialization, years_experience)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            
+            result = self.admin.db.execute_query(
+                query,
+                (
+                    doctor_id,
+                    user['full_name'],
+                    user['email'],
+                    user['phone'],
+                    user.get('gender'),
+                    user.get('age'),
+                    "General",
+                    0,
+                )
+            )
+            
+            if result:
+                return True, f"Doctor profile created! ID: {doctor_id}"
+            return False, "Failed to create doctor profile"
+            
+        except Exception as e:
+            return False, str(e)

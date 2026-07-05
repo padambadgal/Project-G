@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Disease - {{ app_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .symptom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.8rem;
+    }
+    .symptom-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--white-smoke);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .symptom-item:hover {
+        background: rgba(196, 30, 58, 0.1);
+    }
+    .symptom-item input[type="radio"] {
+        accent-color: var(--primary-red);
+        width: 18px;
+        height: 18px;
+    }
+    .symptom-item label {
+        cursor: pointer;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-stethoscope"></i> Predict Disease</h1>
+            <p class="welcome-text">Enter patient symptoms for AI-powered prediction</p>
+        </div>
+    </div>
+    
+    <form method="POST" action="{{ url_for('doctor_predict') }}">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-user"></i> Patient Information</h2>
+            </div>
+            <div class="form-group">
+                <label for="patient_id">Patient ID <span class="required">*</span></label>
+                <input type="text" id="patient_id" name="patient_id" class="form-control" 
+                       placeholder="Enter Patient ID" required>
+                <small style="color: var(--medium-gray);">Enter the patient ID to associate this prediction</small>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h2><i class="fas fa-notes-medical"></i> Symptoms</h2>
+                <span style="font-size: 0.9rem; color: var(--medium-gray);">0 = No, 1 = Yes</span>
+            </div>
+            
+            <div class="symptom-grid">
+                {% if symptoms %}
+                    {% for symptom in symptoms %}
+                    <div class="symptom-item">
+                        <label>{{ symptom.replace('_', ' ').title() }}</label>
+                        <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+                            <label style="font-weight: normal;">
+                                <input type="radio" name="{{ symptom }}" value="0" checked> 0
+                            </label>
+                            <label style="font-weight: normal;">
+                                <input type="radio" name="{{ symptom }}" value="1"> 1
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--medium-gray);">No symptoms defined. Please train the model first.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1.5rem;">
+            <i class="fas fa-brain"></i> Predict Disease
+        </button>
+    </form>
+</div>
+{% endblock %}

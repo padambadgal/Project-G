@@ -1,56 +1,134 @@
 # admin/admin.py
 from database.database import Database
 from authentication.login import Authentication
-from doctor.doctor import Doctor
-from patient.patient import Patient
-from utils.helper import generate_id
+
 
 class Admin:
     def __init__(self):
         self.db = Database()
         self.db.connect()
         self.auth = Authentication()
-    
+
+    # ==========================================================
+    # USER MANAGEMENT
+    # ==========================================================
+
     def get_all_users(self):
-        """Get all users"""
         query = "SELECT * FROM users ORDER BY created_at DESC"
         return self.db.fetch_all(query)
-    
-    def create_user(self, username, password, role, full_name, email=None, phone=None):
-        """Create a new user"""
-        return self.auth.register_user(username, password, role, full_name, email, phone)
-    
+
+    def get_users_by_role(self, role):
+        query = "SELECT * FROM users WHERE role = ? ORDER BY created_at DESC"
+        return self.db.fetch_all(query, (role,))
+
+    def get_doctors(self):
+        return self.get_users_by_role('doctor')
+
+    def get_patients(self):
+        return self.get_users_by_role('patient')
+
+    def create_user(self, username, password, role, full_name, **kwargs):
+        return self.auth.register_user(
+            username=username,
+            password=password,
+            role=role,
+            full_name=full_name,
+            **kwargs
+        )
+
     def delete_user(self, username):
-        """Delete a user"""
-        query = "DELETE FROM users WHERE username = ?"
+        if username == "admin":
+            return False, "Default admin cannot be deleted"
+
+        existing = self.db.fetch_one(
+            "SELECT * FROM users WHERE username=?", (username,)
+        )
+        if not existing:
+            return False, "User not found"
+
         try:
-            self.db.execute_query(query, (username,))
+            self.db.execute_query("DELETE FROM users WHERE username=?", (username,))
             return True, "User deleted successfully"
         except Exception as e:
             return False, str(e)
-    
-    def get_system_statistics(self):
-        """Get system statistics"""
-        # Get user counts
-        user_query = "SELECT role, COUNT(*) FROM users GROUP BY role"
-        user_stats = self.db.fetch_all(user_query)
-        
-        # Get patient and doctor counts
-        patient_count = "SELECT COUNT(*) FROM patients"
-        doctor_count = "SELECT COUNT(*) FROM doctors"
-        prediction_count = "SELECT COUNT(*) FROM predictions"
-        
-        total_patients = self.db.fetch_one(patient_count)[0]
-        total_doctors = self.db.fetch_one(doctor_count)[0]
-        total_predictions = self.db.fetch_one(prediction_count)[0]
-        
+
+    def update_user_role(self, username, new_role):
+        if username == "admin":
+            return False, "Cannot change admin role"
+        if new_role not in ['admin', 'doctor', 'patient']:
+            return False, "Invalid role"
+
+        try:
+            self.db.execute_query(
+                "UPDATE users SET role = ? WHERE username = ?",
+                (new_role, username)
+            )
+            return True, f"User role updated to {new_role}"
+        except Exception as e:
+            return False, str(e)
+
+    # ==========================================================
+    # PATIENT STATISTICS
+    # ==========================================================
+
+    def get_patient_statistics(self):
+        total = self.db.fetch_one(
+            "SELECT COUNT(*) FROM users WHERE role = 'patient'"
+        )[0]
+
+        gender_stats = self.db.fetch_all("""
+            SELECT gender, COUNT(*) as count 
+            FROM users 
+            WHERE role = 'patient' AND gender IS NOT NULL
+            GROUP BY gender
+        """)
+
+        age_stats = self.db.fetch_all("""
+            SELECT 
+                CASE 
+                    WHEN age < 18 THEN 'Minor (<18)'
+                    WHEN age BETWEEN 18 AND 60 THEN 'Adult (18-60)'
+                    WHEN age > 60 THEN 'Senior (>60)'
+                    ELSE 'Unknown'
+                END as age_group,
+                COUNT(*) as count
+            FROM users
+            WHERE role = 'patient'
+            GROUP BY age_group
+        """)
+
         return {
-            'user_stats': user_stats,
-            'total_patients': total_patients,
-            'total_doctors': total_doctors,
-            'total_predictions': total_predictions
+            'total': total,
+            'gender_distribution': gender_stats,
+            'age_distribution': age_stats
         }
-    
+
+    # ==========================================================
+    # SYSTEM STATISTICS
+    # ==========================================================
+
+    def get_system_statistics(self):
+        user_stats = self.db.fetch_all(
+            "SELECT role, COUNT(*) as count FROM users GROUP BY role"
+        )
+
+        patient_count = self.db.fetch_one(
+            "SELECT COUNT(*) FROM users WHERE role = 'patient'"
+        )[0]
+        doctor_count = self.db.fetch_one(
+            "SELECT COUNT(*) FROM users WHERE role = 'doctor'"
+        )[0]
+        prediction_count = self.db.fetch_one(
+            "SELECT COUNT(*) FROM predictions"
+        )[0]
+
+        return {
+            "user_stats": [dict(row) for row in user_stats],
+            "total_patients": patient_count,
+            "total_doctors": doctor_count,
+            "total_predictions": prediction_count,
+        }
+
     def close(self):
-        self.db.close()
         self.auth.close()
+        self.db.close()

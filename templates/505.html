@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Server Error{% endblock %}
+
+{% block content %}
+<div class="container" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+    <div style="text-align: center;">
+        <div style="font-size: 6rem; color: var(--red-primary); font-weight: 800;">500</div>
+        <h1 style="color: var(--red-primary);">Internal Server Error</h1>
+        <p style="color: var(--dark-gray); font-size: 1.2rem;">Something went wrong on our end. Please try again later.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-top: 1rem;">
+            <i class="fas fa-home"></i> Go Home
+        </a>
+    </div>
+</div>
+{% endblock %}

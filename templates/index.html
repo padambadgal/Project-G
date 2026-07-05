@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Home - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+    <div style="text-align: center; max-width: 800px; animation: fadeInUp 0.8s ease;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🏥</div>
+        <h1 style="color: var(--red-primary); font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">
+            {{ app_name }}
+        </h1>
+        <p style="color: var(--dark-gray); font-size: 1.2rem; margin: 1rem 0 2rem 0;">
+            AI-Powered Disease Prediction System for Modern Healthcare
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            {% if session.user_id %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-user-plus"></i> Register
+                </a>
+            {% endif %}
+        </div>
+        
+        <div class="stats-grid" style="margin-top: 3rem;">
+            <div class="stat-card">
+                <div class="stat-icon">🤖</div>
+                <div class="stat-number">AI</div>
+                <div class="stat-label">Powered Predictions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👨‍⚕️</div>
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Doctor Support</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

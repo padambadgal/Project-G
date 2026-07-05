@@ -52,14 +52,14 @@ class PatientMenu:
         patient_info = self.patient.get_patient_by_username(self.user_info['username'])
         
         if patient_info:
-            print(f"Patient ID: {patient_info[1]}")
-            print(f"Full Name: {patient_info[2]}")
-            print(f"Age: {patient_info[3]}")
-            print(f"Gender: {patient_info[4]}")
-            print(f"Contact: {patient_info[5]}")
-            print(f"Address: {patient_info[6]}")
-            print(f"Medical History: {patient_info[7] if patient_info[7] else 'None'}")
-            print(f"Registered: {patient_info[8]}")
+            print(f"Patient ID: {patient_info['patient_id']}")
+            print(f"Full Name: {patient_info['full_name']}")
+            print(f"Age: {patient_info['age']}")
+            print(f"Gender: {patient_info['gender']}")
+            print(f"Contact: {patient_info.get('contact', 'N/A')}")
+            print(f"Address: {patient_info.get('address', 'N/A')}")
+            print(f"Medical History: {patient_info.get('medical_history', 'None')}")
+            print(f"Registered: {patient_info['created_at']}")
         else:
             print("Profile not found.")
         
@@ -77,23 +77,23 @@ class PatientMenu:
             input("\nPress Enter to continue...")
             return
         
-        patient_id = patient_info[1]
+        patient_id = patient_info['patient_id']
         
         print(f"Current Details:")
-        print(f"Name: {patient_info[2]}")
-        print(f"Age: {patient_info[3]}")
-        print(f"Gender: {patient_info[4]}")
-        print(f"Contact: {patient_info[5]}")
-        print(f"Address: {patient_info[6]}")
-        print(f"Medical History: {patient_info[7] if patient_info[7] else 'None'}")
+        print(f"Name: {patient_info['full_name']}")
+        print(f"Age: {patient_info['age']}")
+        print(f"Gender: {patient_info['gender']}")
+        print(f"Contact: {patient_info.get('contact', 'N/A')}")
+        print(f"Address: {patient_info.get('address', 'N/A')}")
+        print(f"Medical History: {patient_info.get('medical_history', 'None')}")
         
         print("\nEnter new values (leave blank to keep current):")
-        full_name = input(f"Full Name [{patient_info[2]}]: ").strip()
-        age = input(f"Age [{patient_info[3]}]: ").strip()
-        gender = input(f"Gender [{patient_info[4]}]: ").strip()
-        contact = input(f"Contact [{patient_info[5]}]: ").strip()
-        address = input(f"Address [{patient_info[6]}]: ").strip()
-        medical_history = input(f"Medical History [{patient_info[7]}]: ").strip()
+        full_name = input(f"Full Name [{patient_info['full_name']}]: ").strip()
+        age = input(f"Age [{patient_info['age']}]: ").strip()
+        gender = input(f"Gender [{patient_info['gender']}]: ").strip()
+        contact = input(f"Contact [{patient_info.get('contact', 'N/A')}]: ").strip()
+        address = input(f"Address [{patient_info.get('address', 'N/A')}]: ").strip()
+        medical_history = input(f"Medical History [{patient_info.get('medical_history', 'None')}]: ").strip()
         
         success, message = self.patient.update_patient(
             patient_id,
@@ -125,14 +125,19 @@ class PatientMenu:
             return
         
         reports = Reports()
-        predictions = reports.get_patient_predictions(patient_info[1])
+        predictions = reports.get_patient_predictions(patient_info['patient_id'])
         
         if predictions:
             print(f"{'Date':<20} {'Disease':<20} {'Doctor':<20} {'Confidence':<12} {'Risk':<10}")
             print("-" * 90)
             for pred in predictions:
-                doctor_name = pred[7] if pred[7] else 'N/A'
-                print(f"{pred[9][:19]:<20} {pred[5]:<20} {doctor_name[:20]:<20} {pred[6]:.2%}   {pred[7]:<10}")
+                doctor_name = pred.get('doctor_name', 'N/A')[:20] if pred.get('doctor_name') else 'N/A'
+                confidence = pred.get('confidence', 0)
+                risk_level = pred.get('risk_level', 'N/A')
+                predicted_at = pred.get('predicted_at', 'N/A')
+                if predicted_at and predicted_at != 'N/A':
+                    predicted_at = str(predicted_at)[:19]
+                print(f"{predicted_at:<20} {pred.get('predicted_disease', 'N/A'):<20} {doctor_name:<20} {confidence:.2%}   {risk_level:<10}")
         else:
             print("No prediction history found.")
         

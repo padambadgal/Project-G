@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+            <p class="welcome-text">Welcome back, {{ user.full_name }}!</p>
+        </div>
+        <div class="header-actions">
+            <form method="POST" action="{{ url_for('admin_train_model') }}" style="display: inline;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-brain"></i> Train AI Model
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-number">{{ stats.total_patients }}</div>
+            <div class="stat-label">Total Patients</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👨‍⚕️</div>
+            <div class="stat-number">{{ stats.total_doctors }}</div>
+            <div class="stat-label">Total Doctors</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-number">{{ stats.total_predictions }}</div>
+            <div class="stat-label">Total Predictions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-number">{{ stats.user_stats|sum(attribute='count') }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <a href="{{ url_for('admin_patients') }}" class="btn btn-primary">
+                <i class="fas fa-users"></i> Patients
+            </a>
+            <a href="{{ url_for('admin_doctors') }}" class="btn btn-primary">
+                <i class="fas fa-user-md"></i> Doctors
+            </a>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-primary">
+                <i class="fas fa-user-cog"></i> Users
+            </a>
+            <a href="{{ url_for('admin_predictions') }}" class="btn btn-primary">
+                <i class="fas fa-chart-line"></i> Predictions
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

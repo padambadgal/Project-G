@@ -7,6 +7,7 @@ from reports.reports import Reports
 from database.database import Database
 from utils.helper import generate_recommendation, calculate_risk_level
 
+
 class DoctorMenu:
     def __init__(self, user_info):
         self.user_info = user_info
@@ -73,9 +74,10 @@ class DoctorMenu:
             input("\nPress Enter to continue...")
             return
         
-        print(f"\nPatient: {patient[2]}")
-        print(f"Age: {patient[3]}")
-        print(f"Gender: {patient[4]}")
+        # Using dictionary access
+        print(f"\nPatient: {patient['full_name']}")
+        print(f"Age: {patient['age']}")
+        print(f"Gender: {patient['gender']}")
         print("-" * 40)
         
         # Get symptoms
@@ -123,18 +125,17 @@ class DoctorMenu:
             if not symptoms_str:
                 symptoms_str = "No symptoms reported"
             
-            # Get doctor ID (using a simple approach)
-            # For now, use a placeholder or find by name
+            # Get doctor ID using dictionary access
             doctor_info = self.doctor.get_all_doctors()
             doctor_id = None
             if doctor_info:
                 # Use the first doctor or find by name
                 for doc in doctor_info:
-                    if self.user_info['full_name'] in doc[2]:
-                        doctor_id = doc[1]
+                    if self.user_info['full_name'] in doc['full_name']:
+                        doctor_id = doc['doctor_id']
                         break
                 if not doctor_id:
-                    doctor_id = doctor_info[0][1]  # Use first doctor
+                    doctor_id = doctor_info[0]['doctor_id']  # Use first doctor
             
             query = """INSERT INTO predictions 
                        (patient_id, doctor_id, symptoms, predicted_disease, confidence, risk_level, recommendation) 
@@ -161,13 +162,13 @@ class DoctorMenu:
         self.clear_screen()
         print("\n--- My Predictions ---\n")
         
-        # Get doctor ID using simple approach
+        # Get doctor ID using dictionary access
         doctor_info = self.doctor.get_all_doctors()
         doctor_id = None
         if doctor_info:
             for doc in doctor_info:
-                if self.user_info['full_name'] in doc[2]:
-                    doctor_id = doc[1]
+                if self.user_info['full_name'] in doc['full_name']:
+                    doctor_id = doc['doctor_id']
                     break
         
         if not doctor_id:
@@ -182,8 +183,14 @@ class DoctorMenu:
             print(f"{'Patient':<20} {'Disease':<20} {'Confidence':<12} {'Risk':<10} {'Date':<20}")
             print("-" * 90)
             for pred in predictions:
-                patient_name = pred[7] if len(pred) > 7 and pred[7] else 'N/A'
-                print(f"{patient_name[:20]:<20} {pred[5]:<20} {pred[6]:.2%}   {pred[7]:<10} {pred[9][:19] if len(pred) > 9 else 'N/A':<20}")
+                patient_name = pred['patient_name'] if pred['patient_name'] else 'N/A'
+                confidence = pred['confidence'] if pred['confidence'] else 0
+                risk_level = pred['risk_level'] if pred['risk_level'] else 'N/A'
+                predicted_at = pred['predicted_at'] if pred['predicted_at'] else 'N/A'
+                if predicted_at and predicted_at != 'N/A':
+                    predicted_at = str(predicted_at)[:19]
+                disease = pred['predicted_disease'] if pred['predicted_disease'] else 'N/A'
+                print(f"{patient_name[:20]:<20} {disease[:20]:<20} {confidence:.2%}   {risk_level:<10} {predicted_at:<20}")
         else:
             print("No predictions found.")
         
@@ -200,7 +207,10 @@ class DoctorMenu:
             print(f"{'ID':<15} {'Name':<30} {'Age':<5} {'Gender':<10} {'Contact':<15}")
             print("-" * 80)
             for patient in patients:
-                print(f"{patient[1]:<15} {patient[2]:<30} {patient[3]:<5} {patient[4]:<10} {patient[5] if patient[5] else 'N/A':<15}")
+                # ✅ FIX: Properly handle age and contact
+                age = patient['age'] if patient['age'] else 'N/A'
+                contact = patient['contact'] if patient['contact'] else 'N/A'
+                print(f"{patient['patient_id']:<15} {patient['full_name']:<30} {age:<5} {patient['gender']:<10} {contact:<15}")
         else:
             print("No patients found.")
         
@@ -218,13 +228,14 @@ class DoctorMenu:
             print(f"\n{'ID':<15} {'Name':<30} {'Age':<5} {'Gender':<10} {'Contact':<15}")
             print("-" * 80)
             for patient in results:
-                print(f"{patient[1]:<15} {patient[2]:<30} {patient[3]:<5} {patient[4]:<10} {patient[5] if patient[5] else 'N/A':<15}")
+                contact = patient['contact'] if patient['contact'] else 'N/A'
+                print(f"{patient['patient_id']:<15} {patient['full_name']:<30} {patient['age']:<5} {patient['gender']:<10} {contact:<15}")
                 
             # Option to view detailed patient info
             if len(results) == 1:
                 view_details = input("\nView detailed patient info? (y/n): ").strip().lower()
                 if view_details == 'y':
-                    self.view_patient_details(results[0][1])
+                    self.view_patient_details(results[0]['patient_id'])
         else:
             print("\nNo patients found matching the search term.")
         
@@ -237,14 +248,18 @@ class DoctorMenu:
         
         patient = self.patient.get_patient_by_id(patient_id)
         if patient:
-            print(f"Patient ID: {patient[1]}")
-            print(f"Full Name: {patient[2]}")
-            print(f"Age: {patient[3]}")
-            print(f"Gender: {patient[4]}")
-            print(f"Contact: {patient[5] if patient[5] else 'N/A'}")
-            print(f"Address: {patient[6] if patient[6] else 'N/A'}")
-            print(f"Medical History: {patient[7] if patient[7] else 'None'}")
-            print(f"Registered: {patient[8]}")
+            contact = patient['contact'] if patient['contact'] else 'N/A'
+            address = patient['address'] if patient['address'] else 'N/A'
+            medical_history = patient['medical_history'] if patient['medical_history'] else 'None'
+            
+            print(f"Patient ID: {patient['patient_id']}")
+            print(f"Full Name: {patient['full_name']}")
+            print(f"Age: {patient['age']}")
+            print(f"Gender: {patient['gender']}")
+            print(f"Contact: {contact}")
+            print(f"Address: {address}")
+            print(f"Medical History: {medical_history}")
+            print(f"Registered: {patient['created_at']}")
             
             # Get prediction history for this patient
             reports = Reports()
@@ -255,8 +270,12 @@ class DoctorMenu:
                 print(f"{'Date':<20} {'Disease':<20} {'Doctor':<20}")
                 print("-" * 60)
                 for pred in predictions:
-                    doctor_name = pred[7] if len(pred) > 7 and pred[7] else 'N/A'
-                    print(f"{pred[9][:19] if len(pred) > 9 else 'N/A':<20} {pred[5]:<20} {doctor_name[:20]:<20}")
+                    doctor_name = pred['doctor_name'] if pred['doctor_name'] else 'N/A'
+                    predicted_at = pred['predicted_at'] if pred['predicted_at'] else 'N/A'
+                    if predicted_at and predicted_at != 'N/A':
+                        predicted_at = str(predicted_at)[:19]
+                    disease = pred['predicted_disease'] if pred['predicted_disease'] else 'N/A'
+                    print(f"{predicted_at:<20} {disease[:20]:<20} {doctor_name[:20]:<20}")
             
             reports.close()
         else:
@@ -269,13 +288,13 @@ class DoctorMenu:
         self.clear_screen()
         print("\n--- Prediction Statistics ---\n")
         
-        # Get doctor ID using simple approach
+        # Get doctor ID using dictionary access
         doctor_info = self.doctor.get_all_doctors()
         doctor_id = None
         if doctor_info:
             for doc in doctor_info:
-                if self.user_info['full_name'] in doc[2]:
-                    doctor_id = doc[1]
+                if self.user_info['full_name'] in doc['full_name']:
+                    doctor_id = doc['doctor_id']
                     break
         
         if not doctor_id:
