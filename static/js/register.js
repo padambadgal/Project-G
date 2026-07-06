@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
             
             try {
-                console.log('Sending registration data:', data); // Debug log
+                console.log('Sending registration data:', data);
                 
                 const response = await fetch('/api/register', {
                     method: 'POST',
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 const result = await response.json();
-                console.log('Registration response:', result); // Debug log
+                console.log('Registration response:', result);
                 
                 if (result.success) {
                     alert('✅ Registration successful! Please login.');
@@ -82,22 +82,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Toggle doctor fields
+    // Toggle role-specific fields
     if (roleSelect) {
         roleSelect.addEventListener('change', function() {
             const doctorFields = document.getElementById('doctor-fields');
+            const patientFields = document.getElementById('patient-fields');
             const specializationField = document.getElementById('specialization');
             
+            // Hide all role-specific fields first
+            doctorFields.style.display = 'none';
+            patientFields.style.display = 'none';
+            
+            // Reset required attributes
+            specializationField.required = false;
+            document.getElementById('address').required = false;
+            document.getElementById('medical_history').required = false;
+            document.getElementById('emergency_contact').required = false;
+            document.getElementById('blood_group').required = false;
+            
+            // Show fields based on selected role
             if (this.value === 'doctor') {
                 doctorFields.style.display = 'block';
                 specializationField.required = true;
                 specializationField.parentElement.querySelector('label').innerHTML = 
                     'Specialization <span style="color: #c0392b;">*</span>';
-            } else {
+            } else if (this.value === 'patient') {
+                patientFields.style.display = 'block';
+                // Make patient fields optional but visible
+                document.getElementById('address').required = false;
+                document.getElementById('medical_history').required = false;
+                document.getElementById('emergency_contact').required = false;
+                document.getElementById('blood_group').required = false;
+            } else if (this.value === 'admin') {
+                // Admin doesn't need special fields
                 doctorFields.style.display = 'none';
-                specializationField.required = false;
-                specializationField.parentElement.querySelector('label').innerHTML = 
-                    'Specialization';
+                patientFields.style.display = 'none';
             }
         });
     }

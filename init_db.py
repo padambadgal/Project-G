@@ -6,16 +6,16 @@ import hashlib
 def init_database():
     # Create database directory if it doesn't exist
     os.makedirs('database', exist_ok=True)
-    
+
     conn = sqlite3.connect('database/hospital.db')
     cursor = conn.cursor()
-    
+
     # Drop existing tables if they exist (for clean setup)
     cursor.execute('DROP TABLE IF EXISTS predictions')
     cursor.execute('DROP TABLE IF EXISTS medical_records')
     cursor.execute('DROP TABLE IF EXISTS doctors')
     cursor.execute('DROP TABLE IF EXISTS users')
-    
+
     # Users table
     cursor.execute('''
     CREATE TABLE users (
@@ -35,7 +35,7 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
-    
+
     # Doctors table
     cursor.execute('''
     CREATE TABLE doctors (
@@ -53,7 +53,7 @@ def init_database():
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
     ''')
-    
+
     # Medical records table - with all required columns
     cursor.execute('''
     CREATE TABLE medical_records (
@@ -70,7 +70,7 @@ def init_database():
         FOREIGN KEY (doctor_id) REFERENCES users(id)
     )
     ''')
-    
+
     # Predictions table
     cursor.execute('''
     CREATE TABLE predictions (
@@ -87,45 +87,45 @@ def init_database():
         FOREIGN KEY (doctor_id) REFERENCES users(id)
     )
     ''')
-    
+
     # Create indexes
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_medical_records_patient ON medical_records(patient_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_medical_records_doctor ON medical_records(doctor_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_predictions_patient ON predictions(patient_id)')
-    
+
     # Create a default admin user
     admin_password = hashlib.sha256('admin123'.encode()).hexdigest()
     cursor.execute('''
-    INSERT OR IGNORE INTO users (username, password, full_name, role, email) 
+    INSERT OR IGNORE INTO users (username, password, full_name, role, email)
     VALUES (?, ?, ?, ?, ?)
     ''', ('admin', admin_password, 'System Admin', 'admin', 'admin@hospital.com'))
-    
+
     # Create a default doctor user (for testing)
     doctor_password = hashlib.sha256('doctor123'.encode()).hexdigest()
     cursor.execute('''
-    INSERT OR IGNORE INTO users (username, password, full_name, role, email) 
+    INSERT OR IGNORE INTO users (username, password, full_name, role, email)
     VALUES (?, ?, ?, ?, ?)
     ''', ('doctor', doctor_password, 'Dr. John Smith', 'doctor', 'doctor@hospital.com'))
-    
+
     # Get the doctor user_id
     cursor.execute('SELECT id FROM users WHERE username = ?', ('doctor',))
     doctor_user = cursor.fetchone()
     if doctor_user:
         cursor.execute('''
-        INSERT OR IGNORE INTO doctors (user_id, specialization, years_experience, qualification, 
-                        hospital_name, consultation_fee, bio, available_days, available_time) 
+        INSERT OR IGNORE INTO doctors (user_id, specialization, years_experience, qualification,
+                        hospital_name, consultation_fee, bio, available_days, available_time)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (doctor_user[0], 'Cardiologist', 10, 'MD, PhD', 'City Hospital', 100.00, 
+        ''', (doctor_user[0], 'Cardiologist', 10, 'MD, PhD', 'City Hospital', 100.00,
               'Experienced cardiologist with 10 years of practice', 'Mon-Fri', '9:00 AM - 5:00 PM'))
-    
+
     # Create a default patient user (for testing)
     patient_password = hashlib.sha256('patient123'.encode()).hexdigest()
     cursor.execute('''
-    INSERT OR IGNORE INTO users (username, password, full_name, role, email) 
+    INSERT OR IGNORE INTO users (username, password, full_name, role, email)
     VALUES (?, ?, ?, ?, ?)
     ''', ('patient', patient_password, 'John Doe', 'patient', 'patient@email.com'))
-    
+
     conn.commit()
     conn.close()
     print("✅ Database initialized successfully!")

@@ -1,3 +1,4 @@
+# authentication/login.py
 import sqlite3
 import hashlib
 
@@ -29,6 +30,8 @@ class Authentication:
         db = self.get_db()
         
         try:
+            print(f"Registering user: {username}, role: {role}")  # Debug
+            
             # Check if username exists
             existing = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
             if existing:
@@ -54,9 +57,11 @@ class Authentication:
                  kwargs.get('emergency_contact'), kwargs.get('blood_group'))
             )
             user_id = cursor.lastrowid
+            print(f"User inserted with ID: {user_id}")  # Debug
             
             # Insert doctor details if role is doctor
             if role == 'doctor':
+                print("Inserting doctor details...")  # Debug
                 db.execute(
                     '''INSERT INTO doctors 
                        (user_id, specialization, years_experience, qualification, 
@@ -72,15 +77,15 @@ class Authentication:
                      kwargs.get('available_days', ''),
                      kwargs.get('available_time', ''))
                 )
+                print("Doctor details inserted")  # Debug
             
             db.commit()
             db.close()
+            print("Registration successful!")  # Debug
             return True, "User registered successfully"
             
         except Exception as e:
+            print(f"Registration error: {str(e)}")  # Debug
             db.rollback()
             db.close()
             return False, f"Registration failed: {str(e)}"
-
-    def close(self):
-        self.db.close()

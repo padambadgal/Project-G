@@ -109,51 +109,68 @@ def register_page():
 # =========================
 @app.route("/api/register", methods=["POST"])
 def register():
-    data = request.get_json()
-    
-    # Validate required fields
-    required_fields = ['username', 'password', 'role', 'full_name']
-    for field in required_fields:
-        if not data.get(field):
-            return jsonify({
-                "success": False,
-                "message": f"Missing required field: {field}"
-            })
-    
-    success, message = auth.register_user(
-        username=data.get("username"),
-        password=data.get("password"),
-        role=data.get("role"),
-        full_name=data.get("full_name"),
+    try:
+        data = request.get_json()
+        print("Received registration data:", data)  # Debug
         
-        # Common Fields
-        email=data.get("email"),
-        phone=data.get("phone"),
-        gender=data.get("gender"),
-        age=data.get("age"),
+        # Validate required fields
+        required_fields = ['username', 'password', 'role', 'full_name']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    "success": False,
+                    "message": f"Missing required field: {field}"
+                })
         
-        # Patient Profile
-        address=data.get("address"),
-        medical_history=data.get("medical_history"),
-        emergency_contact=data.get("emergency_contact"),
-        blood_group=data.get("blood_group"),
+        # For doctor role, validate specialization
+        if data.get('role') == 'doctor':
+            if not data.get('specialization'):
+                return jsonify({
+                    "success": False,
+                    "message": "Specialization is required for doctors"
+                })
         
-        # Doctor Profile
-        specialization=data.get("specialization"),
-        years_experience=data.get("years_experience"),
-        qualification=data.get("qualification"),
-        hospital_name=data.get("hospital_name"),
-        consultation_fee=data.get("consultation_fee"),
-        bio=data.get("bio"),
-        available_days=data.get("available_days"),
-        available_time=data.get("available_time")
-    )
-    
-    return jsonify({
-        "success": success,
-        "message": message
-    })
-
+        success, message = auth.register_user(
+            username=data.get("username"),
+            password=data.get("password"),
+            role=data.get("role"),
+            full_name=data.get("full_name"),
+            
+            # Common Fields
+            email=data.get("email"),
+            phone=data.get("phone"),
+            gender=data.get("gender"),
+            age=data.get("age"),
+            
+            # Patient Profile
+            address=data.get("address"),
+            medical_history=data.get("medical_history"),
+            emergency_contact=data.get("emergency_contact"),
+            blood_group=data.get("blood_group"),
+            
+            # Doctor Profile
+            specialization=data.get("specialization"),
+            years_experience=data.get("years_experience"),
+            qualification=data.get("qualification"),
+            hospital_name=data.get("hospital_name"),
+            consultation_fee=data.get("consultation_fee"),
+            bio=data.get("bio"),
+            available_days=data.get("available_days"),
+            available_time=data.get("available_time")
+        )
+        
+        print(f"Registration result: success={success}, message={message}")  # Debug
+        
+        return jsonify({
+            "success": success,
+            "message": message
+        })
+    except Exception as e:
+        print(f"API registration error: {str(e)}")  # Debug
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        })
 # =========================
 # LOGOUT
 # =========================
