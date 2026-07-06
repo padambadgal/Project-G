@@ -71,12 +71,50 @@ class Authentication:
         return self.db.fetch_one(query, (user_id,))
 
 
+    from utils.validation import Validator
+
     def register_user(self, username, password, role, full_name, **kwargs):
         """Register a new user and create role profile"""
 
+        # ==================================================
+        # CLEAN INPUT
+        # ==================================================
         username = username.strip()
         full_name = full_name.strip()
 
+        # ==================================================
+        # VALIDATION LAYER
+        # ==================================================
+        valid, msg = Validator.validate_username(username)
+        if not valid:
+            return False, msg
+
+        valid, msg = Validator.validate_password(password)
+        if not valid:
+            return False, msg
+
+        valid, msg = Validator.validate_role(role)
+        if not valid:
+            return False, msg
+
+        if kwargs.get("email"):
+            valid, msg = Validator.validate_email(kwargs.get("email"))
+            if not valid:
+                return False, msg
+
+        if kwargs.get("phone"):
+            valid, msg = Validator.validate_phone(kwargs.get("phone"))
+            if not valid:
+                return False, msg
+
+        if kwargs.get("age"):
+            valid, msg = Validator.validate_age(kwargs.get("age"))
+            if not valid:
+                return False, msg
+
+        # ==================================================
+        # BASIC CHECKS
+        # ==================================================
         if not username:
             return False, "Username is required"
 
@@ -89,14 +127,9 @@ class Authentication:
         if role not in ("admin", "doctor", "patient"):
             return False, "Invalid role"
 
-        # Username check
+        # Username exists check
         if self.get_user_by_username(username):
             return False, "Username already exists"
-
-        email = kwargs.get("email")
-        phone = kwargs.get("phone")
-        gender = kwargs.get("gender")
-        age = kwargs.get("age")
 
         hashed_password = self.hash_password(password)
 
@@ -105,7 +138,6 @@ class Authentication:
             # ==================================================
             # INSERT USER
             # ==================================================
-
             user_query = """
             INSERT INTO users
             (
@@ -128,19 +160,18 @@ class Authentication:
                     hashed_password,
                     role,
                     full_name,
-                    email,
-                    phone,
-                    gender,
-                    age,
+                    kwargs.get("email"),
+                    kwargs.get("phone"),
+                    kwargs.get("gender"),
+                    kwargs.get("age"),
                 ),
             )
 
             user_id = self.db.cursor.lastrowid
 
             # ==================================================
-            # CREATE PATIENT PROFILE
+            # PATIENT PROFILE
             # ==================================================
-
             if role == "patient":
 
                 patient_query = """
@@ -167,9 +198,8 @@ class Authentication:
                 )
 
             # ==================================================
-            # CREATE DOCTOR PROFILE
+            # DOCTOR PROFILE
             # ==================================================
-
             elif role == "doctor":
 
                 doctor_query = """
@@ -205,14 +235,11 @@ class Authentication:
 
             self.db.connection.commit()
 
-            return True, "Registration Successful"
+            return True, f"Registration Successful (User ID: {user_id})"
 
         except Exception as e:
-
             self.db.connection.rollback()
-
-            print(e)
-
+            print("❌ Registration Error:", e)
             return False, str(e)
 
     def close(self):
