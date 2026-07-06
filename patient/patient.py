@@ -17,9 +17,26 @@ class Patient:
 
     def get_patient_by_username(self, username):
         query = """
-        SELECT * FROM users 
-        WHERE username = ? AND role = 'patient'
+        SELECT 
+            u.id,
+            u.username,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.gender,
+            u.age,
+            u.created_at,
+
+            p.address,
+            p.medical_history,
+            p.emergency_contact,
+            p.blood_group
+
+        FROM users u
+        LEFT JOIN patient_profile p ON u.id = p.user_id
+        WHERE u.username = ? AND u.role = 'patient'
         """
+
         return self.db.fetch_one(query, (username,))
 
     def get_all_patients(self):
@@ -99,6 +116,40 @@ class Patient:
             "SELECT COUNT(*) FROM users WHERE role = 'patient'"
         )
         return result[0] if result else 0
+
+    def get_medical_records(self, patient_id):
+        query = """
+        SELECT 
+            mr.id,
+            mr.symptoms,
+            mr.disease,
+            mr.diagnosis,
+            mr.prescription,
+            mr.notes,
+            mr.visit_date,
+
+            u.full_name AS doctor_name
+
+        FROM medical_records mr
+        LEFT JOIN users u ON mr.doctor_id = u.id
+        WHERE mr.patient_id = ?
+        ORDER BY mr.visit_date DESC
+        """
+
+        return self.db.fetch_all(query, (patient_id,))
+        
+    def get_predictions(self, patient_id):
+        query = """
+        SELECT 
+            p.*,
+            u.full_name AS doctor_name
+        FROM predictions p
+        LEFT JOIN users u ON p.doctor_id = u.id
+        WHERE p.patient_id = ?
+        ORDER BY p.predicted_at DESC
+        """
+
+        return self.db.fetch_all(query, (patient_id,))
 
     def close(self):
         self.db.close()

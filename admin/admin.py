@@ -14,18 +14,33 @@ class Admin:
     # ==========================================================
 
     def get_all_users(self):
-        query = "SELECT * FROM users ORDER BY created_at DESC"
-        return self.db.fetch_all(query)
+    query = """
+    SELECT * FROM users
+    ORDER BY created_at DESC
+    """
+    return self.db.fetch_all(query)
 
     def get_users_by_role(self, role):
         query = "SELECT * FROM users WHERE role = ? ORDER BY created_at DESC"
         return self.db.fetch_all(query, (role,))
 
-    def get_doctors(self):
-        return self.get_users_by_role('doctor')
+    def get_all_doctors(self):
+        query = """
+        SELECT u.*, d.specialization, d.years_experience
+        FROM users u
+        LEFT JOIN doctor_profile d ON u.id = d.user_id
+        WHERE u.role = 'doctor'
+        """
+        return self.db.fetch_all(query)
 
-    def get_patients(self):
-        return self.get_users_by_role('patient')
+    def get_all_patients(self):
+        query = """
+        SELECT u.*, p.blood_group, p.medical_history
+        FROM users u
+        LEFT JOIN patient_profile p ON u.id = p.user_id
+        WHERE u.role = 'patient'
+        """
+        return self.db.fetch_all(query)
 
     def create_user(self, username, password, role, full_name, **kwargs):
         return self.auth.register_user(
@@ -36,18 +51,12 @@ class Admin:
             **kwargs
         )
 
-    def delete_user(self, username):
-        if username == "admin":
-            return False, "Default admin cannot be deleted"
-
-        existing = self.db.fetch_one(
-            "SELECT * FROM users WHERE username=?", (username,)
-        )
-        if not existing:
-            return False, "User not found"
-
+    def delete_user(self, user_id):
         try:
-            self.db.execute_query("DELETE FROM users WHERE username=?", (username,))
+            self.db.execute_query(
+                "DELETE FROM users WHERE id = ?",
+                (user_id,)
+            )
             return True, "User deleted successfully"
         except Exception as e:
             return False, str(e)

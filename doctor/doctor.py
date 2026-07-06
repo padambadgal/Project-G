@@ -1,7 +1,7 @@
 # doctor/doctor.py
 from database.database import Database
 from utils.validation import Validator
-
+from utils.ai_engine import AIEngine
 
 class Doctor:
     def __init__(self):
@@ -17,8 +17,28 @@ class Doctor:
 
     def get_doctor_by_username(self, username):
         query = """
-        SELECT * FROM users 
-        WHERE username = ? AND role = 'doctor'
+        SELECT 
+            u.id,
+            u.username,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.gender,
+            u.age,
+            u.created_at,
+
+            d.specialization,
+            d.years_experience,
+            d.qualification,
+            d.hospital_name,
+            d.consultation_fee,
+            d.bio,
+            d.available_days,
+            d.available_time
+
+        FROM users u
+        LEFT JOIN doctor_profile d ON u.id = d.user_id
+        WHERE u.username = ? AND u.role = 'doctor'
         """
         return self.db.fetch_one(query, (username,))
 
@@ -100,5 +120,79 @@ class Doctor:
         )
         return result[0] if result else 0
 
+    def add_medical_record(self, patient_id, doctor_id, symptoms, disease, diagnosis, prescription, notes):
+        query = """
+        INSERT INTO medical_records
+        (
+            patient_id,
+            doctor_id,
+            symptoms,
+            disease,
+            diagnosis,
+            prescription,
+            notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """
+
+        try:
+            self.db.execute_query(
+                query,
+                (
+                    patient_id,
+                    doctor_id,
+                    symptoms,
+                    disease,
+                    diagnosis,
+                    prescription,
+                    notes
+                )
+            )
+            return True, "Medical record added successfully"
+
+        except Exception as e:
+            return False, str(e)
+    
+    def predict_disease(self, patient_id, doctor_id, symptoms):
+
+        ai = AIEngine()
+
+        result = ai.analyze(symptoms)
+
+        disease = result["disease"]
+        risk = result["risk"]
+        confidence = result["confidence"]
+
+        recommendation = f"Consult specialist for {disease}"
+
+        query = """
+        INSERT INTO predictions
+        (
+            patient_id,
+            doctor_id,
+            symptoms,
+            predicted_disease,
+            confidence,
+            risk_level,
+            recommendation
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """
+
+        self.db.execute_query(
+            query,
+            (
+                patient_id,
+                doctor_id,
+                symptoms,
+                disease,
+                confidence,
+                risk,
+                recommendation
+            )
+        )
+
+        return result
+    
     def close(self):
         self.db.close()

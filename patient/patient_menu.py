@@ -1,6 +1,6 @@
 # patient/patient_menu.py
 import os
-from patient.patient import Patient
+from models.patient import Patient
 from reports.reports import Reports
 
 class PatientMenu:
@@ -45,26 +45,37 @@ class PatientMenu:
                 input("\nInvalid choice. Press Enter to continue...")
     
     def view_profile(self):
-        """View patient profile"""
-        self.clear_screen()
-        print("\n--- My Profile ---\n")
-        
-        patient_info = self.patient.get_patient_by_username(self.user_info['username'])
-        
-        if patient_info:
-            print(f"Patient ID: {patient_info['patient_id']}")
-            print(f"Full Name: {patient_info['full_name']}")
-            print(f"Age: {patient_info['age']}")
-            print(f"Gender: {patient_info['gender']}")
-            print(f"Contact: {patient_info.get('contact', 'N/A')}")
-            print(f"Address: {patient_info.get('address', 'N/A')}")
-            print(f"Medical History: {patient_info.get('medical_history', 'None')}")
-            print(f"Registered: {patient_info['created_at']}")
+        print("\n--- Doctor Profile ---\n")
+
+        doctor = self.doctor.get_doctor_by_username(self.user_info['username'])
+
+        if doctor:
+
+            print(f"User ID: {doctor['id']}")
+            print(f"Username: {doctor['username']}")
+            print(f"Full Name: {doctor['full_name']}")
+            print(f"Email: {doctor['email']}")
+            print(f"Phone: {doctor['phone']}")
+            print(f"Gender: {doctor['gender']}")
+            print(f"Age: {doctor['age']}")
+
+            print(f"\n--- Professional Info ---")
+            print(f"Specialization: {doctor['specialization']}")
+            print(f"Experience: {doctor['years_experience']} years")
+            print(f"Qualification: {doctor['qualification']}")
+            print(f"Hospital: {doctor['hospital_name']}")
+            print(f"Fee: {doctor['consultation_fee']}")
+            print(f"Bio: {doctor['bio']}")
+            print(f"Available Days: {doctor['available_days']}")
+            print(f"Available Time: {doctor['available_time']}")
+
+            print(f"\nRegistered: {doctor['created_at']}")
+
         else:
             print("Profile not found.")
-        
+
         input("\nPress Enter to continue...")
-    
+
     def update_profile(self):
         """Update patient profile"""
         self.clear_screen()
@@ -142,4 +153,28 @@ class PatientMenu:
             print("No prediction history found.")
         
         reports.close()
+        input("\nPress Enter to continue...")
+
+    def view_predictions(self):
+        print("\n--- Disease Predictions ---\n")
+
+        patient_id = self.user_info['id']
+
+        predictions = self.patient.get_predictions(patient_id)
+
+        if predictions:
+
+            for p in predictions:
+                print(f"\nDoctor: {p['doctor_name']}")
+                print(f"Symptoms: {p['symptoms']}")
+                print(f"Disease: {p['predicted_disease']}")
+                print(f"Confidence: {p['confidence'] * 100}%")
+                print(f"Risk: {p['risk_level']}")
+                print(f"Recommendation: {p['recommendation']}")
+                print(f"Date: {p['predicted_at']}")
+                print("-" * 40)
+
+        else:
+            print("No predictions found.")
+
         input("\nPress Enter to continue...")

@@ -1,7 +1,7 @@
 # doctor/doctor_menu.py
 import os
-from doctor.doctor import Doctor
-from patient.patient import Patient
+from models.doctor import Doctor
+from models.patient import Patient
 from ai.predict import DiseasePredictor
 from reports.reports import Reports
 from database.database import Database
@@ -310,4 +310,28 @@ class DoctorMenu:
         print(f"Unique Patients: {stats['unique_patients']}")
         
         reports.close()
+        input("\nPress Enter to continue...")
+
+    def view_medical_history(self):
+        print("\n--- Medical History ---\n")
+
+        patient_id = self.user_info['id']
+
+        records = self.patient.get_medical_records(patient_id)
+
+        if records:
+
+            for r in records:
+                print(f"\nDoctor: {r['doctor_name']}")
+                print(f"Symptoms: {r['symptoms']}")
+                print(f"Disease: {r['disease']}")
+                print(f"Diagnosis: {r['diagnosis']}")
+                print(f"Prescription: {r['prescription']}")
+                print(f"Notes: {r['notes']}")
+                print(f"Date: {r['visit_date']}")
+                print("-" * 40)
+
+        else:
+            print("No medical records found.")
+
         input("\nPress Enter to continue...")

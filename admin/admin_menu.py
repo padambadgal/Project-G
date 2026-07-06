@@ -2,8 +2,8 @@
 import os
 import sys
 from admin.admin import Admin
-from doctor.doctor import Doctor
-from patient.patient import Patient
+from models.doctor import Doctor
+from models.patient import Patient
 
 class AdminMenu:
     def __init__(self, user_info):
