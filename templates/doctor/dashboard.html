@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard - AI Hospital System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-user-md"></i> Doctor Dashboard</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('doctor_add_record') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Record
+        </a>
+        <a href="{{ url_for('doctor_profile') }}" class="btn btn-secondary">
+            <i class="fas fa-user"></i> My Profile
+        </a>
+    </div>
+</div>
+
+<!-- Doctor Info -->
+<div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #c0392b, #e74c3c); color: white;">
+    <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div>
+                <h2 style="color: white; margin-bottom: 0.25rem;">Dr. {{ session.full_name }}</h2>
+                <p style="opacity: 0.9;">{{ doctor.specialization if doctor else 'General Practitioner' }}</p>
+                <p style="opacity: 0.8; font-size: 0.9rem;">
+                    <i class="fas fa-hospital"></i> {{ doctor.hospital_name if doctor else 'City Hospital' }}
+                </p>
+            </div>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">{{ doctor.years_experience or 0 }}</div>
+                <div style="opacity: 0.9; font-size: 0.9rem;">Years Experience</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">${{ "%.0f"|format(doctor.consultation_fee or 0) }}</div>
+                <div style="opacity: 0.9; font-size: 0.9rem;">Consultation Fee</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_patients }}</div>
+        <div class="stat-label"><i class="fas fa-user-injured"></i> Total Patients</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_records }}</div>
+        <div class="stat-label"><i class="fas fa-notes-medical"></i> Medical Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_predictions }}</div>
+        <div class="stat-label"><i class="fas fa-robot"></i> Predictions Made</div>
+    </div>
+</div>
+
+<!-- Recent Patients -->
+<h2 class="section-title"><i class="fas fa-user-injured"></i> Recent Patients</h2>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in recent_patients %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 35px; height: 35px; border-radius: 50%; background: #2ecc71; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <strong>{{ patient.full_name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ patient.email or 'N/A' }}</td>
+                    <td>{{ patient.phone or 'N/A' }}</td>
+                    <td>{{ patient.created_at[:10] if patient.created_at else 'N/A' }}</td>
+                    <td>
+                        <button onclick="viewPatient({{ patient.id }})" class="btn btn-info" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #999; padding: 2rem;">
+                        <i class="fas fa-user-injured" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                        No patients yet
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin-top: 2rem;">
+    <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <a href="{{ url_for('doctor_add_record') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-plus-circle" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">Add Record</h3>
+            <p style="color: #666; font-size: 0.9rem;">Create new medical record</p>
+        </a>
+        <a href="{{ url_for('doctor_patients') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-user-injured" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">View Patients</h3>
+            <p style="color: #666; font-size: 0.9rem;">View all your patients</p>
+        </a>
+        <a href="{{ url_for('doctor_predictions') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-robot" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">Predictions</h3>
+            <p style="color: #666; font-size: 0.9rem;">View disease predictions</p>
+        </a>
+        <a href="{{ url_for('doctor_history') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-history" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">History</h3>
+            <p style="color: #666; font-size: 0.9rem;">View medical history</p>
+        </a>
+    </div>
+</div>
+
+<!-- View Patient Modal -->
+<div id="viewPatientModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #c0392b;"><i class="fas fa-user-injured"></i> Patient Details</h2>
+            <button onclick="closeModal('viewPatientModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        <div id="patientDetails">
+            <!-- Patient details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewPatient(patientId) {
+    document.getElementById('patientDetails').innerHTML = `
+        <div class="profile-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: #2ecc71; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 style="margin-top: 0.5rem;">Patient Name</h3>
+                <span style="color: #666;">@username</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Email</span>
+                <span class="value">patient@email.com</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Phone</span>
+                <span class="value">+1 234 567 8900</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Joined</span>
+                <span class="value">2024-01-01</span>
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                <a href="{{ url_for('doctor_add_record') }}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                    <i class="fas fa-plus"></i> Add Record
+                </a>
+            </div>
+        </div>
+    `;
+    document.getElementById('viewPatientModal').style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+document.getElementById('viewPatientModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

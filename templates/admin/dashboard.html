@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - AI Hospital System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('admin_users') }}" class="btn btn-primary">
+            <i class="fas fa-users"></i> Manage Users
+        </a>
+        <a href="{{ url_for('admin_doctors') }}" class="btn btn-secondary">
+            <i class="fas fa-user-md"></i> Manage Doctors
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_users }}</div>
+        <div class="stat-label"><i class="fas fa-users"></i> Total Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_doctors }}</div>
+        <div class="stat-label"><i class="fas fa-user-md"></i> Total Doctors</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_patients }}</div>
+        <div class="stat-label"><i class="fas fa-user-injured"></i> Total Patients</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_predictions }}</div>
+        <div class="stat-label"><i class="fas fa-robot"></i> Total Predictions</div>
+    </div>
+</div>
+
+<!-- Recent Predictions -->
+<h2 class="section-title"><i class="fas fa-chart-line"></i> Recent Predictions</h2>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Disease</th>
+                    <th>Confidence</th>
+                    <th>Risk Level</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in recent_predictions %}
+                <tr>
+                    <td>{{ prediction.patient_name }}</td>
+                    <td>{{ prediction.disease }}</td>
+                    <td>{{ "%.1f"|format(prediction.confidence * 100) }}%</td>
+                    <td>
+                        <span class="risk-{{ prediction.risk|lower }}">
+                            {{ prediction.risk }}
+                        </span>
+                    </td>
+                    <td>{{ prediction.created_at[:10] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #999;">
+                        <i class="fas fa-info-circle"></i> No predictions yet
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions" style="margin-top: 2rem;">
+    <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <a href="{{ url_for('admin_users') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-user-plus" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">Add User</h3>
+            <p style="color: #666; font-size: 0.9rem;">Create new user accounts</p>
+        </a>
+        <a href="{{ url_for('admin_doctors') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-user-md" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">Manage Doctors</h3>
+            <p style="color: #666; font-size: 0.9rem;">View and manage doctors</p>
+        </a>
+        <a href="{{ url_for('admin_patients') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-user-injured" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">Manage Patients</h3>
+            <p style="color: #666; font-size: 0.9rem;">View and manage patients</p>
+        </a>
+        <a href="{{ url_for('admin_predictions') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-robot" style="font-size: 2rem; color: #c0392b;"></i>
+            <h3 style="color: #333; margin-top: 0.5rem;">View Predictions</h3>
+            <p style="color: #666; font-size: 0.9rem;">All disease predictions</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

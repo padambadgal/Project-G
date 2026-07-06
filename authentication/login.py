@@ -1,7 +1,7 @@
 # authentication/login.py
 import hashlib
 from database.database import Database
-
+from utils.validation import Validator
 
 class Authentication:
     def __init__(self):

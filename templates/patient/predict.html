@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Prediction - Patient{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-robot"></i> Disease Prediction</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Prediction Form -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-stethoscope"></i> Enter Your Symptoms</h3>
+            <p style="color: #666; margin-top: 0.5rem;">Describe your symptoms for AI-powered disease prediction</p>
+        </div>
+        
+        <form method="POST" class="prediction-form" id="predictionForm">
+            <div class="form-group">
+                <label for="symptoms"><i class="fas fa-thermometer-half"></i> Symptoms <span style="color: #c0392b;">*</span></label>
+                <textarea id="symptoms" name="symptoms" rows="6" required 
+                    placeholder="Describe your symptoms in detail...&#10;&#10;Example:&#10;- Fever (38.5°C) for 3 days&#10;- Persistent cough&#10;- Fatigue and weakness&#10;- Headache&#10;- Sore throat"
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button type="submit" class="btn btn-primary" style="flex: 2; padding: 1rem;">
+                    <i class="fas fa-robot"></i> Predict Disease
+                </button>
+                <button type="reset" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-undo"></i> Clear
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Information -->
+    <div>
+        <div class="card" style="background: #f9f9f9;">
+            <h3 style="color: #c0392b; margin-bottom: 1rem;">
+                <i class="fas fa-info-circle"></i> How It Works
+            </h3>
+            <div style="display: grid; gap: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #c0392b; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                        <i class="fas fa-1"></i>
+                    </div>
+                    <div>
+                        <h4 style="color: #333;">Describe Symptoms</h4>
+                        <p style="color: #666; font-size: 0.9rem;">Enter your symptoms in detail</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #c0392b; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                        <i class="fas fa-2"></i>
+                    </div>
+                    <div>
+                        <h4 style="color: #333;">AI Analysis</h4>
+                        <p style="color: #666; font-size: 0.9rem;">Our AI model analyzes your symptoms</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #c0392b; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                        <i class="fas fa-3"></i>
+                    </div>
+                    <div>
+                        <h4 style="color: #333;">Get Results</h4>
+                        <p style="color: #666; font-size: 0.9rem;">Receive disease prediction with confidence</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107;">
+                <h4 style="color: #856404;">
+                    <i class="fas fa-exclamation-triangle"></i> Disclaimer
+                </h4>
+                <p style="color: #856404; font-size: 0.9rem;">
+                    This is an AI-powered prediction system. Always consult with a qualified healthcare professional for proper diagnosis and treatment.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Common Symptoms Guide -->
+        <div class="card" style="margin-top: 1rem;">
+            <h4 style="color: #333; margin-bottom: 0.5rem;">
+                <i class="fas fa-list"></i> Common Symptoms
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem; color: #666;">
+                <div>• Fever</div>
+                <div>• Cough</div>
+                <div>• Headache</div>
+                <div>• Fatigue</div>
+                <div>• Sore throat</div>
+                <div>• Runny nose</div>
+                <div>• Shortness of breath</div>
+                <div>• Chest pain</div>
+                <div>• Nausea</div>
+                <div>• Body aches</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('predictionForm').addEventListener('submit', function(e) {
+    const symptoms = document.getElementById('symptoms').value.trim();
+    
+    if (!symptoms) {
+        e.preventDefault();
+        alert('Please describe your symptoms.');
+        document.getElementById('symptoms').focus();
+        return;
+    }
+    
+    if (symptoms.length < 10) {
+        e.preventDefault();
+        alert('Please provide more details about your symptoms (at least 10 characters).');
+        document.getElementById('symptoms').focus();
+        return;
+    }
+    
+    if (!confirm('Proceed with disease prediction?')) {
+        e.preventDefault();
+    }
+});
+
+// Auto-resize textarea
+document.getElementById('symptoms').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+});
+</script>
+{% endblock %}

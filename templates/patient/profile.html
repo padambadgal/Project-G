@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Patient{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-user"></i> My Profile</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="profile-info">
+            <h2>{{ patient.full_name }}</h2>
+            <span class="role-badge patient">
+                <i class="fas fa-user-injured"></i> Patient
+            </span>
+            <p style="color: #666; margin-top: 0.5rem;">
+                <i class="fas fa-id-card"></i> {{ patient.username }}
+            </p>
+        </div>
+    </div>
+
+    <div class="profile-details">
+        <div class="detail-item">
+            <span class="label"><i class="fas fa-user"></i> Username</span>
+            <span class="value">{{ patient.username }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label"><i class="fas fa-envelope"></i> Email</span>
+            <span class="value">{{ patient.email or 'Not provided' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label"><i class="fas fa-phone"></i> Phone</span>
+            <span class="value">{{ patient.phone or 'Not provided' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label"><i class="fas fa-calendar-check"></i> Joined</span>
+            <span class="value">{{ patient.created_at[:10] if patient.created_at else 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label"><i class="fas fa-user-tag"></i> Role</span>
+            <span class="value">
+                <span class="role-badge patient">
+                    {{ patient.role|title }}
+                </span>
+            </span>
+        </div>
+        <div class="detail-item">
+            <span class="label"><i class="fas fa-shield-alt"></i> Status</span>
+            <span class="value" style="color: #27ae60;">
+                <i class="fas fa-check-circle"></i> Active
+            </span>
+        </div>
+    </div>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; border-top: 1px solid #f0f0f0; padding-top: 2rem;">
+        <button onclick="editProfile()" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Profile
+        </button>
+        <button onclick="changePassword()" class="btn btn-secondary">
+            <i class="fas fa-key"></i> Change Password
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Summary -->
+<div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_records }}</div>
+        <div class="stat-label"><i class="fas fa-notes-medical"></i> Medical Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_predictions }}</div>
+        <div class="stat-label"><i class="fas fa-robot"></i> Predictions</div>
+    </div>
+</div>
+
+<script>
+function editProfile() {
+    alert('Edit profile functionality would be implemented here.');
+}
+
+function changePassword() {
+    alert('Change password functionality would be implemented here.');
+}
+</script>
+{% endblock %}

@@ -2,120 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Hospital System</title>
-
-    <style>
-        /* =========================
-           GLOBAL STYLE
-        ========================= */
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #f8f8f8, #ffffff);
-        }
-
-        /* =========================
-           HEADER
-        ========================= */
-        .header {
-            background: #c62828; /* red theme */
-            color: white;
-            padding: 18px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        /* =========================
-           CENTER CONTAINER
-        ========================= */
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 85vh;
-        }
-
-        /* =========================
-           CARD STYLE (CENTER BOX)
-        ========================= */
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            width: 400px;
-            text-align: center;
-        }
-
-        /* =========================
-           INPUT FIELDS
-        ========================= */
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        input:focus, select:focus {
-            border-color: #c62828;
-        }
-
-        /* =========================
-           BUTTON
-        ========================= */
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #c62828;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background: #a31818;
-        }
-
-        /* =========================
-           FOOTER TEXT
-        ========================= */
-        .footer {
-            text-align: center;
-            padding: 10px;
-            font-size: 12px;
-            color: gray;
-        }
-
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Hospital System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
 </head>
-
 <body>
-
-    <!-- HEADER -->
-    <div class="header">
-        🏥 AI Hospital Management System
-    </div>
-
-    <!-- CENTER CONTENT -->
-    <div class="container">
-        <div class="card">
-            {% block content %}
-            {% endblock %}
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="nav-logo">
+                <span class="brand-text">AI Hospital System</span>
+            </div>
+            <div class="nav-menu">
+                {% if session.user_id %}
+                    <span class="nav-user"><i class="fas fa-user"></i> {{ session.full_name }}</span>
+                    <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="{{ url_for('register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Register</a>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- FOOTER -->
-    <div class="footer">
-        © 2026 AI Hospital System | Designed with ❤️
-    </div>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                        <span class="flash-close" onclick="this.parentElement.style.display='none'">&times;</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 AI Hospital Disease Prediction System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

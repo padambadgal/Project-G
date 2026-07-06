@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard - AI Hospital System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-user-injured"></i> Patient Dashboard</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('patient_predict') }}" class="btn btn-primary">
+            <i class="fas fa-robot"></i> New Prediction
+        </a>
+        <a href="{{ url_for('patient_profile') }}" class="btn btn-secondary">
+            <i class="fas fa-user"></i> My Profile
+        </a>
+    </div>
+</div>
+
+<!-- Welcome Message -->
+<div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #c0392b, #e74c3c); color: white;">
+    <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <h2 style="color: white; margin-bottom: 0.25rem;">Welcome, {{ session.full_name }}</h2>
+                <p style="opacity: 0.9;">
+                    <i class="fas fa-user-injured"></i> Patient
+                </p>
+            </div>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">{{ total_records }}</div>
+                <div style="opacity: 0.9; font-size: 0.9rem;">Medical Records</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">{{ total_predictions }}</div>
+                <div style="opacity: 0.9; font-size: 0.9rem;">Predictions</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <a href="{{ url_for('patient_predict') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem; transition: all 0.3s;">
+        <i class="fas fa-robot" style="font-size: 2.5rem; color: #c0392b;"></i>
+        <h3 style="color: #333; margin-top: 0.5rem;">Predict Disease</h3>
+        <p style="color: #666; font-size: 0.9rem;">Get AI-powered predictions</p>
+    </a>
+    <a href="{{ url_for('patient_records') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem; transition: all 0.3s;">
+        <i class="fas fa-notes-medical" style="font-size: 2.5rem; color: #c0392b;"></i>
+        <h3 style="color: #333; margin-top: 0.5rem;">View Records</h3>
+        <p style="color: #666; font-size: 0.9rem;">Your medical history</p>
+    </a>
+    <a href="{{ url_for('patient_history') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem; transition: all 0.3s;">
+        <i class="fas fa-history" style="font-size: 2.5rem; color: #c0392b;"></i>
+        <h3 style="color: #333; margin-top: 0.5rem;">Prediction History</h3>
+        <p style="color: #666; font-size: 0.9rem;">Your prediction history</p>
+    </a>
+    <a href="{{ url_for('patient_profile') }}" class="card" style="text-decoration: none; text-align: center; padding: 2rem; transition: all 0.3s;">
+        <i class="fas fa-user" style="font-size: 2.5rem; color: #c0392b;"></i>
+        <h3 style="color: #333; margin-top: 0.5rem;">My Profile</h3>
+        <p style="color: #666; font-size: 0.9rem;">View and edit profile</p>
+    </a>
+</div>
+
+<!-- Recent Records -->
+<h2 class="section-title"><i class="fas fa-notes-medical"></i> Recent Medical Records</h2>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Disease</th>
+                    <th>Diagnosis</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in recent_records %}
+                <tr>
+                    <td>{{ record.created_at[:10] if record.created_at else 'N/A' }}</td>
+                    <td>Dr. {{ record.doctor_name }}</td>
+                    <td>
+                        <span style="font-weight: 500; color: #c0392b;">{{ record.disease }}</span>
+                    </td>
+                    <td>{{ record.diagnosis[:50] }}{% if record.diagnosis|length > 50 %}...{% endif %}</td>
+                    <td>
+                        <button onclick="viewRecord({{ record.id }})" class="btn btn-info" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #999; padding: 2rem;">
+                        <i class="fas fa-notes-medical" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                        No medical records found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recent Predictions -->
+<h2 class="section-title"><i class="fas fa-robot"></i> Recent Predictions</h2>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Disease</th>
+                    <th>Confidence</th>
+                    <th>Risk</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in recent_predictions %}
+                <tr>
+                    <td>{{ prediction.created_at[:10] if prediction.created_at else 'N/A' }}</td>
+                    <td>{% if prediction.doctor_name %}Dr. {{ prediction.doctor_name }}{% else %}Self{% endif %}</td>
+                    <td>
+                        <span style="font-weight: 500; color: #c0392b;">{{ prediction.disease }}</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+                                <div style="height: 100%; width: {{ (prediction.confidence * 100)|int }}%; background: linear-gradient(90deg, #c0392b, #e74c3c); border-radius: 3px;"></div>
+                            </div>
+                            <span style="font-weight: 500; min-width: 45px;">{{ "%.1f"|format(prediction.confidence * 100) }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="risk-{{ prediction.risk|lower }}">
+                            <i class="fas 
+                                {% if prediction.risk == 'High' %}fa-exclamation-circle
+                                {% elif prediction.risk == 'Medium' %}fa-exclamation-triangle
+                                {% else %}fa-check-circle{% endif %}">
+                            </i>
+                            {{ prediction.risk }}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="viewPrediction({{ prediction.id }})" class="btn btn-info" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #999; padding: 2rem;">
+                        <i class="fas fa-robot" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                        No predictions yet
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- View Record Modal -->
+<div id="viewRecordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #c0392b;"><i class="fas fa-notes-medical"></i> Medical Record</h2>
+            <button onclick="closeModal('viewRecordModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        <div id="recordDetails">
+            <!-- Record details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- View Prediction Modal -->
+<div id="viewPredictionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #c0392b;"><i class="fas fa-robot"></i> Prediction Details</h2>
+            <button onclick="closeModal('viewPredictionModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        <div id="predictionDetails">
+            <!-- Prediction details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<style>
+.risk-low {
+    background: #d4edda;
+    color: #155724;
+}
+.risk-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+.risk-high {
+    background: #f8d7da;
+    color: #721c24;
+}
+</style>
+
+<script>
+function viewRecord(recordId) {
+    document.getElementById('recordDetails').innerHTML = `
+        <div class="profile-card">
+            <div style="display: grid; gap: 1rem;">
+                <div class="detail-item">
+                    <span class="label">Doctor</span>
+                    <span class="value">Dr. Doctor Name</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Disease</span>
+                    <span class="value" style="color: #c0392b; font-weight: bold;">Disease Name</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Symptoms</span>
+                    <span class="value">Fever, cough, fatigue</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Diagnosis</span>
+                    <span class="value">Detailed diagnosis information</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Prescription</span>
+                    <span class="value">Medication: Drug A, Drug B</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Notes</span>
+                    <span class="value">Additional notes</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Date</span>
+                    <span class="value">2024-01-01</span>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('viewRecordModal').style.display = 'flex';
+}
+
+function viewPrediction(predictionId) {
+    document.getElementById('predictionDetails').innerHTML = `
+        <div class="profile-card">
+            <div style="text-align: center; margin-bottom: 1.5rem; padding: 1rem; background: #f9f9f9; border-radius: 5px;">
+                <div style="font-size: 2rem; color: #c0392b; font-weight: bold;">Predicted Disease</div>
+                <div style="margin-top: 0.5rem;">
+                    <span class="risk-low" style="padding: 0.25rem 1rem; border-radius: 20px;">Low Risk</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="label">Doctor</span>
+                <span class="value">Dr. Doctor Name</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Symptoms</span>
+                <span class="value">Fever, cough, fatigue</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Confidence</span>
+                <span class="value">85.5%</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Recommendation</span>
+                <span class="value">Please consult a doctor for proper diagnosis.</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Date</span>
+                <span class="value">2024-01-01</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('viewPredictionModal').style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+document.getElementById('viewRecordModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+
+document.getElementById('viewPredictionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

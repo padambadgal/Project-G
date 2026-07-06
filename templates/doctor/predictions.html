@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}My Predictions - Doctor{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-robot"></i> Disease Predictions</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-number">{{ predictions|length }}</div>
+        <div class="stat-label"><i class="fas fa-robot"></i> Total Predictions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {% set high_risk = predictions|selectattr('risk', 'equalto', 'High')|list|length %}
+            {{ high_risk }}
+        </div>
+        <div class="stat-label"><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> High Risk Cases</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {% set unique_patients = predictions|map(attribute='patient_id')|unique|list|length %}
+            {{ unique_patients }}
+        </div>
+        <div class="stat-label"><i class="fas fa-user-injured"></i> Unique Patients</div>
+    </div>
+</div>
+
+<!-- Predictions Table -->
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Symptoms</th>
+                    <th>Disease</th>
+                    <th>Confidence</th>
+                    <th>Risk</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in predictions %}
+                <tr>
+                    <td>{{ prediction.id }}</td>
+                    <td>
+                        <strong>{{ prediction.patient_name }}</strong>
+                    </td>
+                    <td>{{ prediction.symptoms[:50] }}{% if prediction.symptoms|length > 50 %}...{% endif %}</td>
+                    <td>
+                        <span style="font-weight: 500; color: #c0392b;">{{ prediction.disease }}</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+                                <div style="height: 100%; width: {{ (prediction.confidence * 100)|int }}%; background: linear-gradient(90deg, #c0392b, #e74c3c); border-radius: 3px;"></div>
+                            </div>
+                            <span style="font-weight: 500; min-width: 45px;">{{ "%.1f"|format(prediction.confidence * 100) }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="risk-{{ prediction.risk|lower }}">
+                            <i class="fas 
+                                {% if prediction.risk == 'High' %}fa-exclamation-circle
+                                {% elif prediction.risk == 'Medium' %}fa-exclamation-triangle
+                                {% else %}fa-check-circle{% endif %}">
+                            </i>
+                            {{ prediction.risk }}
+                        </span>
+                    </td>
+                    <td>{{ prediction.created_at[:10] if prediction.created_at else 'N/A' }}</td>
+                    <td>
+                        <button onclick="viewPrediction({{ prediction.id }})" class="btn btn-info" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #999; padding: 2rem;">
+                        <i class="fas fa-robot" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                        No predictions made yet
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- View Prediction Modal -->
+<div id="viewPredictionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #c0392b;"><i class="fas fa-robot"></i> Prediction Details</h2>
+            <button onclick="closeModal('viewPredictionModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        <div id="predictionDetails">
+            <!-- Prediction details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<style>
+.risk-low {
+    background: #d4edda;
+    color: #155724;
+}
+.risk-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+.risk-high {
+    background: #f8d7da;
+    color: #721c24;
+}
+</style>
+
+<script>
+function viewPrediction(predictionId) {
+    document.getElementById('predictionDetails').innerHTML = `
+        <div class="profile-card">
+            <div style="text-align: center; margin-bottom: 1.5rem; padding: 1rem; background: #f9f9f9; border-radius: 5px;">
+                <div style="font-size: 2rem; color: #c0392b; font-weight: bold;">Predicted Disease</div>
+                <div style="margin-top: 0.5rem;">
+                    <span class="risk-low" style="padding: 0.25rem 1rem; border-radius: 20px;">Low Risk</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="label">Patient</span>
+                <span class="value">Patient Name</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Symptoms</span>
+                <span class="value">Fever, cough, fatigue, headache</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Confidence</span>
+                <span class="value">85.5%</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Risk Level</span>
+                <span class="value"><span class="risk-low" style="padding: 0.25rem 1rem; border-radius: 20px;">Low</span></span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Recommendation</span>
+                <span class="value">Please consult a doctor for proper diagnosis and treatment.</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Date</span>
+                <span class="value">2024-01-01</span>
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; border-top: 1px solid #f0f0f0; padding-top: 1rem;">
+                <a href="{{ url_for('doctor_add_record') }}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                    <i class="fas fa-plus"></i> Add Record
+                </a>
+            </div>
+        </div>
+    `;
+    document.getElementById('viewPredictionModal').style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+document.getElementById('viewPredictionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

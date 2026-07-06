@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Patients - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-user-injured"></i> Manage Patients</h1>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('register') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Patient
+        </a>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-number">{{ patients|length }}</div>
+        <div class="stat-label"><i class="fas fa-user-injured"></i> Total Patients</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {% set active_count = 0 %}
+            {% for patient in patients %}
+                {% if patient.status == 'active' %}
+                    {% set active_count = active_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            {{ active_count }}
+        </div>
+        <div class="stat-label"><i class="fas fa-check-circle"></i> Active Patients</div>
+    </div>
+</div>
+
+<!-- Patients Table -->
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Patient</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #2ecc71; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">{{ patient.full_name }}</div>
+                                <div style="font-size: 0.8rem; color: #666;">@{{ patient.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ patient.email or 'N/A' }}</td>
+                    <td>{{ patient.phone or 'N/A' }}</td>
+                    <td>{{ patient.created_at[:10] if patient.created_at else 'N/A' }}</td>
+                    <td>
+                        <span style="color: #27ae60;">
+                            <i class="fas fa-circle" style="font-size: 0.5rem;"></i> Active
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button onclick="viewPatient({{ patient.id }})" class="btn btn-info" style="padding: 0.25rem 0.5rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editPatient({{ patient.id }})" class="btn btn-success" style="padding: 0.25rem 0.5rem;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deletePatient({{ patient.id }})" class="btn btn-danger" style="padding: 0.25rem 0.5rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #999; padding: 2rem;">
+                        <i class="fas fa-user-injured" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                        No patients registered
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- View Patient Modal -->
+<div id="viewPatientModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #c0392b;"><i class="fas fa-user-injured"></i> Patient Details</h2>
+            <button onclick="closeModal('viewPatientModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        <div id="patientDetails">
+            <!-- Patient details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewPatient(patientId) {
+    document.getElementById('patientDetails').innerHTML = `
+        <div class="profile-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: #2ecc71; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 style="margin-top: 0.5rem;">Patient Full Name</h3>
+                <span style="color: #666;">@username</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Email</span>
+                <span class="value">patient@email.com</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Phone</span>
+                <span class="value">+1 234 567 8900</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Joined</span>
+                <span class="value">2024-01-01</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Status</span>
+                <span class="value" style="color: #27ae60;"><i class="fas fa-check-circle"></i> Active</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('viewPatientModal').style.display = 'flex';
+}
+
+function editPatient(patientId) {
+    if (confirm(`Edit patient ${patientId}? This feature would open an edit form.`)) {
+        alert('Edit functionality would be implemented here.');
+    }
+}
+
+function deletePatient(patientId) {
+    if (confirm(`Are you sure you want to delete this patient? This action cannot be undone.`)) {
+        alert(`Patient ${patientId} would be deleted.`);
+    }
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+document.getElementById('viewPatientModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

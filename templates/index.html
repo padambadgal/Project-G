@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI Hospital System{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Welcome to AI Hospital Disease Prediction System</h1>
+        <p>Advanced AI-powered healthcare solutions for accurate disease prediction and management</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary"><i class="fas fa-user-plus"></i> Register</a>
+        </div>
+    </div>
+    <div class="hero-image">
+        <img src="{{ url_for('static', filename='images/hospital-bg.jpg') }}" alt="Hospital">
+    </div>
+</div>
+
+<div class="features-section">
+    <h2>Key Features</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fas fa-robot feature-icon"></i>
+            <h3>AI Predictions</h3>
+            <p>Advanced AI models for accurate disease prediction</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-user-md feature-icon"></i>
+            <h3>Expert Doctors</h3>
+            <p>Connect with experienced healthcare professionals</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-history feature-icon"></i>
+            <h3>Medical History</h3>
+            <p>Track and manage your complete medical history</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
