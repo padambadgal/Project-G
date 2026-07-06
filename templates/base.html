@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Hospital System</title>
+
+    <style>
+        /* =========================
+           GLOBAL STYLE
+        ========================= */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #f8f8f8, #ffffff);
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+        .header {
+            background: #c62828; /* red theme */
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* =========================
+           CENTER CONTAINER
+        ========================= */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 85vh;
+        }
+
+        /* =========================
+           CARD STYLE (CENTER BOX)
+        ========================= */
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            width: 400px;
+            text-align: center;
+        }
+
+        /* =========================
+           INPUT FIELDS
+        ========================= */
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #c62828;
+        }
+
+        /* =========================
+           BUTTON
+        ========================= */
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #c62828;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #a31818;
+        }
+
+        /* =========================
+           FOOTER TEXT
+        ========================= */
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: gray;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        🏥 AI Hospital Management System
+    </div>
+
+    <!-- CENTER CONTENT -->
+    <div class="container">
+        <div class="card">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        © 2026 AI Hospital System | Designed with ❤️
+    </div>
+
+</body>
+</html>
