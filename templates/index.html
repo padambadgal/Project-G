@@ -8,12 +8,12 @@
         <h1>Welcome to AI Hospital Disease Prediction System</h1>
         <p>Advanced AI-powered healthcare solutions for accurate disease prediction and management</p>
         <div class="hero-buttons">
-            <a href="{{ url_for('login') }}" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login</a>
-            <a href="{{ url_for('register') }}" class="btn btn-secondary"><i class="fas fa-user-plus"></i> Register</a>
+            <a href="/login" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="/register" class="btn btn-secondary"><i class="fas fa-user-plus"></i> Register</a>
         </div>
     </div>
     <div class="hero-image">
-        <img src="{{ url_for('static', filename='images/hospital-bg.jpg') }}" alt="Hospital">
+        <img src="{{ url_for('static', filename='images/hospital-bg.jpg') }}" alt="Hospital" onerror="this.style.display='none'">
     </div>
 </div>
 

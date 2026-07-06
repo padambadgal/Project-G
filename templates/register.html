@@ -14,24 +14,24 @@
             <p>Create your account</p>
         </div>
         
-        <form method="POST" class="register-form">
+        <form id="registerForm" class="register-form" onsubmit="return false;">
             <div class="form-group">
-                <label for="username"><i class="fas fa-user"></i> Username</label>
+                <label for="username"><i class="fas fa-user"></i> Username <span style="color: #c0392b;">*</span></label>
                 <input type="text" id="username" name="username" required placeholder="Choose a username">
             </div>
             
             <div class="form-group">
-                <label for="full_name"><i class="fas fa-id-card"></i> Full Name</label>
+                <label for="full_name"><i class="fas fa-id-card"></i> Full Name <span style="color: #c0392b;">*</span></label>
                 <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
             </div>
             
             <div class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="password" name="password" required placeholder="Create a password">
+                <label for="password"><i class="fas fa-lock"></i> Password <span style="color: #c0392b;">*</span></label>
+                <input type="password" id="password" name="password" required placeholder="Create a password (min 6 characters)">
             </div>
             
             <div class="form-group">
-                <label for="confirm_password"><i class="fas fa-lock"></i> Confirm Password</label>
+                <label for="confirm_password"><i class="fas fa-lock"></i> Confirm Password <span style="color: #c0392b;">*</span></label>
                 <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
             </div>
             
@@ -46,24 +46,39 @@
             </div>
             
             <div class="form-group">
-                <label for="role"><i class="fas fa-user-tag"></i> Role</label>
+                <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                <select id="gender" name="gender">
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="age"><i class="fas fa-calendar"></i> Age</label>
+                <input type="number" id="age" name="age" placeholder="Enter your age" min="1" max="150">
+            </div>
+            
+            <div class="form-group">
+                <label for="role"><i class="fas fa-user-tag"></i> Role <span style="color: #c0392b;">*</span></label>
                 <select id="role" name="role" required>
                     <option value="">Select a role</option>
                     <option value="patient">Patient</option>
                     <option value="doctor">Doctor</option>
-                    <option value="admin">Admin</option>
                 </select>
             </div>
             
             <div id="doctor-fields" style="display: none;">
+                <h3 style="color: #c0392b; margin: 1rem 0 0.5rem 0;">Doctor Details</h3>
                 <div class="form-group">
-                    <label for="specialization">Specialization</label>
+                    <label for="specialization">Specialization <span style="color: #c0392b;">*</span></label>
                     <input type="text" id="specialization" name="specialization" placeholder="e.g., Cardiologist">
                 </div>
                 
                 <div class="form-group">
                     <label for="years_experience">Years of Experience</label>
-                    <input type="number" id="years_experience" name="years_experience" placeholder="0">
+                    <input type="number" id="years_experience" name="years_experience" placeholder="0" min="0">
                 </div>
                 
                 <div class="form-group">
@@ -78,7 +93,7 @@
                 
                 <div class="form-group">
                     <label for="consultation_fee">Consultation Fee ($)</label>
-                    <input type="number" step="0.01" id="consultation_fee" name="consultation_fee" placeholder="0.00">
+                    <input type="number" step="0.01" id="consultation_fee" name="consultation_fee" placeholder="0.00" min="0">
                 </div>
                 
                 <div class="form-group">
@@ -103,19 +118,10 @@
         </form>
         
         <div class="register-footer">
-            <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+            <p>Already have an account? <a href="/login">Login here</a></p>
         </div>
     </div>
 </div>
 
-<script>
-document.getElementById('role').addEventListener('change', function() {
-    const doctorFields = document.getElementById('doctor-fields');
-    if (this.value === 'doctor') {
-        doctorFields.style.display = 'block';
-    } else {
-        doctorFields.style.display = 'none';
-    }
-});
-</script>
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
 {% endblock %}

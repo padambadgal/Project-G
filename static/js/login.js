@@ -1,23 +1,58 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.querySelector('.login-form');
+    const loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            const username = document.getElementById('username');
-            const password = document.getElementById('password');
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            if (!username.value.trim()) {
-                e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username) {
                 showError('Please enter your username');
-                username.focus();
                 return;
             }
             
-            if (!password.value.trim()) {
-                e.preventDefault();
+            if (!password) {
                 showError('Please enter your password');
-                password.focus();
                 return;
+            }
+            
+            // Disable submit button
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Redirect based on role
+                    if (data.role === 'admin') {
+                        window.location.href = '/admin/dashboard';
+                    } else if (data.role === 'doctor') {
+                        window.location.href = '/doctor/dashboard';
+                    } else {
+                        window.location.href = '/patient/dashboard';
+                    }
+                } else {
+                    showError(data.message || 'Invalid username or password');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                }
+            } catch (error) {
+                showError('An error occurred. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                console.error('Login error:', error);
             }
         });
     }
@@ -30,7 +65,7 @@ function showError(message) {
     
     // Create error message
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'flash-message flash-error';
+    errorDiv.className = 'flash-message flash-error error-message';
     errorDiv.innerHTML = `
         <i class="fas fa-exclamation-circle"></i>
         ${message}

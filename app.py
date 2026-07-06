@@ -173,10 +173,17 @@ def admin_dashboard():
     db = get_db()
     
     # Get statistics
-    total_users = db.execute('SELECT COUNT(*) as count FROM users').fetchone()['count']
-    total_doctors = db.execute('SELECT COUNT(*) as count FROM doctors').fetchone()['count']
-    total_patients = db.execute('SELECT COUNT(*) as count FROM users WHERE role = "patient"').fetchone()['count']
-    total_predictions = db.execute('SELECT COUNT(*) as count FROM predictions').fetchone()['count']
+    total_users = db.execute('SELECT COUNT(*) as count FROM users').fetchone()
+    total_users = total_users['count'] if total_users else 0
+    
+    total_doctors = db.execute('SELECT COUNT(*) as count FROM doctors').fetchone()
+    total_doctors = total_doctors['count'] if total_doctors else 0
+    
+    total_patients = db.execute('SELECT COUNT(*) as count FROM users WHERE role = "patient"').fetchone()
+    total_patients = total_patients['count'] if total_patients else 0
+    
+    total_predictions = db.execute('SELECT COUNT(*) as count FROM predictions').fetchone()
+    total_predictions = total_predictions['count'] if total_predictions else 0
     
     # Recent predictions
     recent_predictions = db.execute(
@@ -193,8 +200,7 @@ def admin_dashboard():
                          total_doctors=total_doctors,
                          total_patients=total_patients,
                          total_predictions=total_predictions,
-                         recent_predictions=recent_predictions)
-
+                         recent_predictions=recent_predictions if recent_predictions else [])
 @app.route("/admin/users")
 @login_required
 @role_required('admin')
@@ -273,23 +279,26 @@ def doctor_dashboard():
         (session['user_id'],)
     ).fetchone()
     
-    # Get statistics
+    # Get statistics - handle no records case
     total_patients = db.execute(
         'SELECT COUNT(DISTINCT patient_id) as count FROM medical_records WHERE doctor_id = ?',
         (session['user_id'],)
-    ).fetchone()['count']
+    ).fetchone()
+    total_patients = total_patients['count'] if total_patients else 0
     
     total_records = db.execute(
         'SELECT COUNT(*) as count FROM medical_records WHERE doctor_id = ?',
         (session['user_id'],)
-    ).fetchone()['count']
+    ).fetchone()
+    total_records = total_records['count'] if total_records else 0
     
     total_predictions = db.execute(
         'SELECT COUNT(*) as count FROM predictions WHERE doctor_id = ?',
         (session['user_id'],)
-    ).fetchone()['count']
+    ).fetchone()
+    total_predictions = total_predictions['count'] if total_predictions else 0
     
-    # Recent patients
+    # Recent patients - handle no records case
     recent_patients = db.execute(
         '''SELECT DISTINCT u.* 
            FROM medical_records r 
@@ -306,7 +315,7 @@ def doctor_dashboard():
                          total_patients=total_patients,
                          total_records=total_records,
                          total_predictions=total_predictions,
-                         recent_patients=recent_patients)
+                         recent_patients=recent_patients if recent_patients else [])
 
 @app.route("/doctor/profile")
 @login_required

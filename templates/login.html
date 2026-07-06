@@ -14,7 +14,7 @@
             <p>Access your account</p>
         </div>
         
-        <form method="POST" class="login-form">
+        <form id="loginForm" class="login-form" onsubmit="return false;">
             <div class="form-group">
                 <label for="username"><i class="fas fa-user"></i> Username</label>
                 <input type="text" id="username" name="username" required placeholder="Enter your username">
@@ -31,8 +31,18 @@
         </form>
         
         <div class="login-footer">
-            <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+        </div>
+        
+        <!-- Test credentials -->
+        <div style="margin-top: 1rem; padding: 0.5rem; background: #f9f9f9; border-radius: 5px; font-size: 0.8rem; color: #666;">
+            <p><strong>Test Credentials:</strong></p>
+            <p>Admin: admin / admin123</p>
+            <p>Doctor: doctor / doctor123</p>
+            <p>Patient: patient / patient123</p>
         </div>
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
 {% endblock %}
