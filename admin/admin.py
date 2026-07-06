@@ -14,11 +14,11 @@ class Admin:
     # ==========================================================
 
     def get_all_users(self):
-    query = """
-    SELECT * FROM users
-    ORDER BY created_at DESC
-    """
-    return self.db.fetch_all(query)
+        query = """
+        SELECT * FROM users
+        ORDER BY created_at DESC
+        """
+        return self.db.fetch_all(query)
 
     def get_users_by_role(self, role):
         query = "SELECT * FROM users WHERE role = ? ORDER BY created_at DESC"
